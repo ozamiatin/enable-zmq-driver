@@ -119,11 +119,12 @@ def start_broker_on_nodes(nodes):
 BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-receiver"
 EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--dry-run', dest='dry_run', action='store_true')
+args = parser.parse_args()
+
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--dry-run', dest='dry_run', action='store_true')
-    args = parser.parse_args()
 
     if args.dry_run:
         print 'Performing dry run'
