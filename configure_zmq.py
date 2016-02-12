@@ -115,27 +115,38 @@ def start_broker_on_nodes(nodes):
         print get_command_output('scp oslo-messaging-zmq-receiver.conf %s:/etc' % node)
         #print get_command_output("ssh %s 'nohup oslo-messaging-zmq-receiver --config-file=/etc/oslo-messaging-zmq-receiver.conf > /dev/null 2>&1 < /dev/null  &'" % node)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--dry-run', dest='dry_run', action='store_true')
-args = parser.parse_args()
 
-if args.dry_run:
-    print 'Performing dry run'
+BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-receiver"
+EXPECTED_NUMBER_OF_FUEL_COLUMNS = 10
 
 
-controllers = get_command_output("fuel nodes 2>&1 | grep controller | awk '{ print $10 }'").split('\n')
-computes = get_command_output("fuel nodes 2>&1 | grep compute | awk '{ print $10 }'").split('\n')
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dry-run', dest='dry_run', action='store_true')
+    args = parser.parse_args()
 
-if args.dry_run:
-    controllers = controllers[:1]
-    computes = computes[:2]
+    if args.dry_run:
+        print 'Performing dry run'
 
-hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
-hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
+    fuel_columns_count = int(get_command_output("fuel nodes 2>&1 | grep controller | awk --field-separator='|' '{ print NF }'"))
+    assert fuel_columns_count == EXPECTED_NUMBER_OF_FUEL_COLUMNS, "Columns have to match %d expected value" % EXPECTED_NUMBER_OF_FUEL_COLUMNS
 
-start_broker_on_nodes(computes + controllers)
+    controllers = get_command_output("fuel nodes 2>&1 | grep controller | awk --field-separator='|' '{ print $5 }'").split('\n')
+    computes = get_command_output("fuel nodes 2>&1 | grep compute | awk --field-separator='|' '{ print $5 }'").split('\n')
 
-restart_resources(controllers[0], PCS_RESOURCES)
+    if args.dry_run:
+        controllers = controllers[:1]
+        computes = computes[:2]
 
-restart_processes_on_nodes(controllers, CONTROLLER_PROCS)
-restart_processes_on_nodes(computes, COMPUTE_PROCS)
+    hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
+    hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
+
+    start_broker_on_nodes(computes + controllers)
+
+    restart_resources(controllers[0], PCS_RESOURCES)
+
+    restart_processes_on_nodes(controllers, CONTROLLER_PROCS)
+    restart_processes_on_nodes(computes, COMPUTE_PROCS)
+
+if __name__=="__main__":
+    main()
