@@ -117,7 +117,7 @@ def start_broker_on_nodes(nodes):
 
 
 BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-receiver"
-EXPECTED_NUMBER_OF_FUEL_COLUMNS = 10
+EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
 
 def main():
@@ -128,11 +128,11 @@ def main():
     if args.dry_run:
         print 'Performing dry run'
 
-    fuel_columns_count = int(get_command_output("fuel nodes 2>&1 | grep controller | awk --field-separator='|' '{ print NF }'").split('\n')[0])
+    fuel_columns_count = int(get_command_output("fuel nodes 2>&1 | grep controller | awk '{ print NF }'").split('\n')[0])
     assert fuel_columns_count == EXPECTED_NUMBER_OF_FUEL_COLUMNS, "Columns have to match %d expected value" % EXPECTED_NUMBER_OF_FUEL_COLUMNS
 
-    controllers = get_command_output("fuel nodes 2>&1 | grep controller | awk --field-separator='|' '{ print $5 }'").split('\n')
-    computes = get_command_output("fuel nodes 2>&1 | grep compute | awk --field-separator='|' '{ print $5 }'").split('\n')
+    controllers = get_command_output("fuel nodes 2>&1 | grep controller | awk '{ print $9 }'").split('\n')
+    computes = get_command_output("fuel nodes 2>&1 | grep compute | awk '{ print $9 }'").split('\n')
 
     if args.dry_run:
         controllers = controllers[:1]
