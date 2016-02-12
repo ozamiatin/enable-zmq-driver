@@ -128,7 +128,7 @@ def main():
     if args.dry_run:
         print 'Performing dry run'
 
-    fuel_columns_count = int(get_command_output("fuel nodes 2>&1 | grep controller | awk --field-separator='|' '{ print NF }'"))
+    fuel_columns_count = int(get_command_output("fuel nodes 2>&1 | grep controller | awk --field-separator='|' '{ print NF }'").split('\n')[0])
     assert fuel_columns_count == EXPECTED_NUMBER_OF_FUEL_COLUMNS, "Columns have to match %d expected value" % EXPECTED_NUMBER_OF_FUEL_COLUMNS
 
     controllers = get_command_output("fuel nodes 2>&1 | grep controller | awk --field-separator='|' '{ print $5 }'").split('\n')
