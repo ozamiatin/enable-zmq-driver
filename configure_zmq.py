@@ -115,7 +115,8 @@ def start_broker_on_nodes(nodes):
     for node in nodes:
         print '\nStarting oslo-messaging-zmq-broker on %s' % node
         print get_command_output('scp oslo-messaging-zmq-receiver.conf %s:/etc' % node)
-        #print get_command_output("ssh %s 'nohup oslo-messaging-zmq-receiver --config-file=/etc/oslo-messaging-zmq-receiver.conf > /dev/null 2>&1 < /dev/null  &'" % node)
+        print get_command_output("ssh %s 'nohup oslo-messaging-zmq-receiver "
+                                 "--config-file=/etc/oslo-messaging-zmq-receiver.conf > /var/log/zmq-broker.log 2>&1 < var/log/zmq-broker.log  &'" % node)
 
 
 def detect_roles():
@@ -129,6 +130,10 @@ def detect_roles():
     if args.dry_run:
         controllers = controllers[:1]
         computes = computes[:2]
+
+
+def deploy_redis():
+    pass
 
 
 BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-receiver"
