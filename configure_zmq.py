@@ -116,19 +116,8 @@ def start_broker_on_nodes(nodes):
         #print get_command_output("ssh %s 'nohup oslo-messaging-zmq-receiver --config-file=/etc/oslo-messaging-zmq-receiver.conf > /dev/null 2>&1 < /dev/null  &'" % node)
 
 
-BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-receiver"
-EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--dry-run', dest='dry_run', action='store_true')
-args = parser.parse_args()
-
-
-def main():
-
-    if args.dry_run:
-        print 'Performing dry run'
-
+def detect_roles():
+    global controllers, computes
     fuel_columns_count = int(get_command_output("fuel nodes 2>&1 | grep controller | awk '{ print NF }'").split('\n')[0])
     assert fuel_columns_count == EXPECTED_NUMBER_OF_FUEL_COLUMNS, "Columns have to match %d expected value" % EXPECTED_NUMBER_OF_FUEL_COLUMNS
 
@@ -138,6 +127,25 @@ def main():
     if args.dry_run:
         controllers = controllers[:1]
         computes = computes[:2]
+
+
+BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-receiver"
+EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--dry-run', dest='dry_run', action='store_true')
+args = parser.parse_args()
+
+controllers = []
+computes = []
+
+
+def main():
+
+    if args.dry_run:
+        print 'Performing dry run'
+
+    detect_roles()
 
     hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
     hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
@@ -149,5 +157,5 @@ def main():
     restart_processes_on_nodes(controllers, CONTROLLER_PROCS)
     restart_processes_on_nodes(computes, COMPUTE_PROCS)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
