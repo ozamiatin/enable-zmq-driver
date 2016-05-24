@@ -152,18 +152,19 @@ def detect_roles():
         computes = computes[:2]
 
 
-def deploy_redis():
-    pass
-
-
 BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
 EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
 PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos7_all.deb"
 PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos7_all.deb"
 
+PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos7_all.deb"
+PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+bmos7_all.deb"
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--dry-run', dest='dry_run', action='store_true')
+parser.add_argument('--install-packages', dest='install_packages',
+                    action='store_true')
 args = parser.parse_args()
 
 controllers = []
@@ -180,8 +181,11 @@ def main():
     print ("Detected controllers: %s" % controllers)
     print ("Detected computes: %s" % computes)
 
-    install_oslo_messaging_package(PACKAGE_URL, PACKAGE_NAME, controllers)
-    install_oslo_messaging_package(PACKAGE_URL, PACKAGE_NAME, computes)
+    if args.install_packages:
+        install_oslo_messaging_package(PACKAGE_URL, PACKAGE_NAME, controllers)
+        install_oslo_messaging_package(PACKAGE_URL, PACKAGE_NAME, computes)
+        install_oslo_messaging_package(PROXY_PACKAGE_URL, PROXY_PACKAGE_NAME, controllers)
+        install_oslo_messaging_package(PROXY_PACKAGE_URL, PROXY_PACKAGE_NAME, computes)
 
     hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
     hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
