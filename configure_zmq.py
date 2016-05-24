@@ -116,10 +116,10 @@ def hack_configs_on_nodes(nodes, configs):
 
 def start_broker_on_nodes(nodes):
     for node in nodes:
-        print '\nStarting oslo-messaging-zmq-broker on %s' % node
-        print get_command_output('scp oslo-messaging-zmq-receiver.conf %s:/etc' % node)
-        print get_command_output("ssh %s 'nohup oslo-messaging-zmq-receiver "
-                                 "--config-file=/etc/oslo-messaging-zmq-receiver.conf > /var/log/zmq-broker.log 2>&1 < var/log/zmq-broker.log  &'" % node)
+        print '\nStarting oslo-messaging-zmq-proxy on %s' % node
+        print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
+        print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
+                                 "--config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < var/log/zmq-proxy.log  &'" % node)
 
 
 def detect_roles():
