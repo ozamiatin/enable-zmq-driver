@@ -13,12 +13,13 @@ CONTROLLER_PROCS = [
     'nova-objectstore',
     'nova-scheduler',
 
-#    'neutron-dhcp-agent',
-#    'neutron-l3-agent',
-#    'neutron-metadata-agent',
-#    'neutron-ns-metadata-proxy',
-#    'neutron-openvswitch-agent',
-    'neutron-server',
+    # All neutron services listed in PCS_RESOURCES
+    # 'neutron-dhcp-agent',
+    # 'neutron-l3-agent',
+    # 'neutron-metadata-agent',
+    # 'neutron-ns-metadata-proxy',
+    # 'neutron-openvswitch-agent',
+    # 'neutron-server',
 
     'cinder-api',
     'cinder-backup',
@@ -33,20 +34,22 @@ CONTROLLER_PROCS = [
     'heat-api',
     'heat-api-cfn',
     'heat-api-cloudwatch',
-#    'heat-engine',
+    'heat-engine',
 ]
 
 COMPUTE_PROCS = [
+    'neutron-metadata-agent',
     'nova-compute',
-
-    'neutron-plugin-openvswitch-agent'
+    'neutron-openvswitch-agent',
+    'neutron-l3-agent',
+    'neutron-rootwrap'
 ]
 
 PCS_RESOURCES = [
-    'p_neutron-plugin-openvswitch-agent',
-    'p_neutron-dhcp-agent',
-    'p_neutron-metadata-agent',
-    'p_neutron-l3-agent',
+    'neutron-openvswitch-agent',
+    'neutron-l3-agent',
+    'neutron-metadata-agent',
+    'neutron-dhcp-agent',
     'p_heat-engine'
 ]
 
@@ -136,7 +139,7 @@ def deploy_redis():
     pass
 
 
-BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-receiver"
+BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
 EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
 parser = argparse.ArgumentParser()
@@ -157,7 +160,7 @@ def main():
     hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
     hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
 
-    start_broker_on_nodes(computes + controllers)
+    start_broker_on_nodes(controllers)
 
     restart_resources(controllers[0], PCS_RESOURCES)
 
