@@ -157,6 +157,9 @@ def main():
 
     detect_roles()
 
+    print ("Detected controllers: %s" % controllers)
+    print ("Detected computes: %s" % computes)
+
     hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
     hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
 
