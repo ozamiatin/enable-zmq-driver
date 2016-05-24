@@ -135,7 +135,7 @@ def install_oslo_messaging_package(package_url, package_name, nodes):
     for node in nodes:
         print '\nInstalling %s on %s' % (package_url, node)
         if not args.dry_run:
-            print get_command_output("ssh %s 'wget -P /tmp/zmq-package/ -U %s'" % (node, package_url))
+            print get_command_output("ssh %s 'wget -P /tmp/zmq-package/ %s'" % (node, package_url))
             print get_command_output("ssh %s 'dpkg -i /tmp/zmq-package/%s'" % (node, package_name))
 
 
