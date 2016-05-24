@@ -71,7 +71,7 @@ COMPUTE_CONFIGS = [
 
 
 def get_command_output(cmd):
-    #print 'Executing cmd: %s' % cmd
+    print 'Executing cmd: %s' % cmd
     pp = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     outp, err = pp.communicate()
 
