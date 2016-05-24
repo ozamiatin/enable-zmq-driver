@@ -116,22 +116,27 @@ def hack_configs_on_nodes(nodes, configs):
 def start_broker_on_nodes(nodes):
 
     for node in nodes:
-        with open('./zmq-proxy.conf', 'w') as conf_f:
-            conf_f.write("rpc_zmq_host=%s\n"
-                         "[matchmaker_redis]\n"
-                         "sentinel_hosts=node-1:26379,node-2:26379,node-3:26379" % node)
-        print '\nStarting oslo-messaging-zmq-proxy on %s' % node
-        print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
-        print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
-                                 "--config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < var/log/zmq-proxy.log  &'" % node)
+        if not args.dry_run:
+            with open('./zmq-proxy.conf', 'w') as conf_f:
+                conf_f.write("rpc_zmq_host=%s\n"
+                             "[matchmaker_redis]\n"
+                             "sentinel_hosts=node-1:26379,node-2:26379,node-3:26379" % node)
+            print '\nStarting oslo-messaging-zmq-proxy on %s' % node
+            print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
+            print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
+                                     "--config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < var/log/zmq-proxy.log  &'" % node)
+        else:
+            print '\nStarting oslo-messaging-zmq-proxy on %s' % node
+
 
 
 def install_oslo_messaging_package(package_url, package_name, nodes):
 
     for node in nodes:
         print '\nInstalling %s on %s' % (package_url, node)
-        print get_command_output("ssh %s/~ 'wget %s'" % (node, package_url))
-        print get_command_output("ssh %s/~ 'dpkg -i %s'" % (node, package_name))
+        if not args.dry_run:
+            print get_command_output("ssh %s/~ 'wget %s'" % (node, package_url))
+            print get_command_output("ssh %s/~ 'dpkg -i %s'" % (node, package_name))
 
 
 def detect_roles():
