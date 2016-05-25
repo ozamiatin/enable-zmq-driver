@@ -206,7 +206,7 @@ def main():
         start_proxy_on_nodes(controllers)
 
     if args.restart_redis:
-        elaborate_processes_on_nodes(controllers, ['redis-server', 'redis-sentinel'])
+        elaborate_processes_on_nodes(controllers, ['redis-server'])
 
     if args.restart_services:
         hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
