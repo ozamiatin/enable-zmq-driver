@@ -3,6 +3,8 @@
 import argparse
 import subprocess
 
+import hack_config_with_zmq
+
 
 CONTROLLER_PROCS = [
     'nova-api',
@@ -119,7 +121,8 @@ def start_broker_on_nodes(nodes):
             with open('./zmq-proxy.conf', 'w') as conf_f:
                 conf_f.write("rpc_zmq_host=%s\n"
                              "[matchmaker_redis]\n"
-                             "sentinel_hosts=node-1:26379,node-2:26379,node-3:26379" % node)
+                             "sentinel_hosts=%s" % (node, ",".join(
+                    hack_config_with_zmq.SENTINEL_HOSTS)))
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
             print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
             print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
