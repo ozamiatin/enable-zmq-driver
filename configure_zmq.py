@@ -118,6 +118,9 @@ def start_broker_on_nodes(nodes):
                              "sentinel_hosts=%s" % (get_managable_ip_from_node(node), ",".join(SENTINEL_HOSTS)))
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
             print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
+            print ("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
+                                     "--config-file=/etc/zmq-proxy.conf > "
+                                     "/var/log/zmq-proxy.log 2>&1 < var/log/zmq-proxy.log  &'" % node)
             print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
                                      "--config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < var/log/zmq-proxy.log  &'" % node)
         else:
