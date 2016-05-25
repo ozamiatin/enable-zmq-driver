@@ -70,7 +70,7 @@ COMPUTE_CONFIGS = [
 
 
 def get_managable_ip_from_node(node):
-    return get_command_output("ssh %s 'hostname'" % node).split('\n')
+    return get_command_output("ssh %s 'hostname'" % node)
 
 def get_command_output(cmd):
     print 'Executing cmd: %s' % cmd
