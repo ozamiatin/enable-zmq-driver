@@ -2,7 +2,7 @@
 
 import argparse
 import subprocess
-import common
+from hack_config_with_zmq import SENTINEL_HOSTS
 
 
 CONTROLLER_PROCS = [
@@ -120,8 +120,7 @@ def start_broker_on_nodes(nodes):
             with open('./zmq-proxy.conf', 'w') as conf_f:
                 conf_f.write("rpc_zmq_host=%s\n"
                              "[matchmaker_redis]\n"
-                             "sentinel_hosts=%s" % (node, ",".join(
-                    common.SENTINEL_HOSTS)))
+                             "sentinel_hosts=%s" % (node, ",".join(SENTINEL_HOSTS)))
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
             print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
             print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
