@@ -73,26 +73,30 @@ def get_managable_ip_from_node(node):
     return get_command_output("ssh %s 'hostname'" % node)
 
 
-def restart_processes_on_nodes(nodes, processes):
+def elaborate_processes_on_nodes(nodes, processes, action='restart'):
     for node in sorted(nodes):
         if not node:
             continue
 
-        print '\nRestarting services on node %s' % node
+        print '\nElaborating services on node %s' % node
 
         for proc in processes:
             if args.dry_run:
-                print "ssh %s 'service %s restart'" % (node, proc)
+                print "ssh %s 'service %s %s'" % (node, proc, action)
             else:
-                print get_command_output("ssh %s 'service %s restart'" % (node, proc))
+                print get_command_output("ssh %s 'service %s %s'" % (node,
+                                                                     proc,
+                                                                     action))
 
 
-def restart_resources(node, resources):
-    print '\nRestarting resources on controller %s' % node
+def elaborate_resources(node, resources, action='restart'):
+    print '\nElaborating resources on controller %s' % node
     for res in resources:
-        print 'Restarting resource %s' % res
+        print 'Elaborating resource %s' % res
         if not args.dry_run:
-            print get_command_output("ssh %s 'crm resource restart %s'" % (node, res))
+            print get_command_output("ssh %s 'crm resource %s %s'" % (node,
+                                                                      action,
+                                                                      res))
 
 
 def hack_configs_on_nodes(nodes, configs):
@@ -106,7 +110,7 @@ def hack_configs_on_nodes(nodes, configs):
                 print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py %s'" % (node, conf_file))
 
 
-def start_broker_on_nodes(nodes):
+def start_proxy_on_nodes(nodes):
 
     for node in nodes:
         print get_managable_ip_from_node(node)
@@ -170,6 +174,10 @@ parser.add_argument('--start-proxies', dest='start_proxies',
                     action='store_true')
 parser.add_argument('--restart-services', dest='restart_services',
                     action='store_true')
+parser.add_argument('--stop-services', dest='stop_services',
+                    action='store_true')
+parser.add_argument('--start-services', dest='start_services',
+                    action='store_true')
 args = parser.parse_args()
 
 controllers = []
@@ -192,17 +200,23 @@ def main():
         install_oslo_messaging_package(PROXY_PACKAGE_URL, PROXY_PACKAGE_NAME, controllers)
         install_oslo_messaging_package(PROXY_PACKAGE_URL, PROXY_PACKAGE_NAME, computes)
 
+    if args.start_proxies:
+        start_proxy_on_nodes(controllers)
+
     if args.restart_services:
         hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
         hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
-
-    if args.start_proxies:
-        start_broker_on_nodes(controllers)
-
-    if args.restart_services:
-        restart_resources(controllers[0], PCS_RESOURCES)
-        restart_processes_on_nodes(controllers, CONTROLLER_PROCS)
-        restart_processes_on_nodes(computes, COMPUTE_PROCS)
+        elaborate_resources(controllers[0], PCS_RESOURCES, 'restart')
+        elaborate_processes_on_nodes(controllers, CONTROLLER_PROCS, 'restart')
+        elaborate_processes_on_nodes(computes, COMPUTE_PROCS, 'restart')
+    elif args.stop_services:
+        elaborate_resources(controllers[0], PCS_RESOURCES, 'stop')
+        elaborate_processes_on_nodes(controllers, CONTROLLER_PROCS, 'stop')
+        elaborate_processes_on_nodes(computes, COMPUTE_PROCS, 'stop')
+    elif args.start_services:
+        elaborate_resources(controllers[0], PCS_RESOURCES, 'start')
+        elaborate_processes_on_nodes(controllers, CONTROLLER_PROCS, 'start')
+        elaborate_processes_on_nodes(computes, COMPUTE_PROCS, 'start')
 
 if __name__ == "__main__":
     main()
