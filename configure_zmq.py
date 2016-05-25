@@ -116,9 +116,11 @@ def hack_configs_on_nodes(nodes, configs):
 def start_broker_on_nodes(nodes):
 
     for node in nodes:
+        print get_command_output("ssh %s 'hostname'" % node)
         if not args.dry_run:
             with open('./zmq-proxy.conf', 'w') as conf_f:
-                conf_f.write("rpc_zmq_host=%s\n"
+                conf_f.write("[DEFAULT]\n"
+                             "rpc_zmq_host=%s\n"
                              "[matchmaker_redis]\n"
                              "sentinel_hosts=%s" % (node, ",".join(SENTINEL_HOSTS)))
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
@@ -168,6 +170,8 @@ parser.add_argument('--install-packages', dest='install_packages',
                     action='store_true')
 parser.add_argument('--start-proxies', dest='start_proxies',
                     action='store_true')
+parser.add_argument('--restart-services', dest='restart_services',
+                    action='store_true')
 args = parser.parse_args()
 
 controllers = []
@@ -196,10 +200,10 @@ def main():
     if args.start_proxies:
         start_broker_on_nodes(controllers)
 
-    restart_resources(controllers[0], PCS_RESOURCES)
-
-    restart_processes_on_nodes(controllers, CONTROLLER_PROCS)
-    restart_processes_on_nodes(computes, COMPUTE_PROCS)
+    if args.restart_services:
+        restart_resources(controllers[0], PCS_RESOURCES)
+        restart_processes_on_nodes(controllers, CONTROLLER_PROCS)
+        restart_processes_on_nodes(computes, COMPUTE_PROCS)
 
 if __name__ == "__main__":
     main()
