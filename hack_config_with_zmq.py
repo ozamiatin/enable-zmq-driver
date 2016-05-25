@@ -3,13 +3,12 @@
 import re
 import socket
 import sys
+import common
 
 RPC_BACKEND = re.compile('^\s*rpc_backend')
 DEFAULT = re.compile('^\s*\[DEFAULT\]\s*$')
 
 IGNORE=['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host', 'default_log_levels']
-
-SENTINEL_HOSTS = ['node-10:26379', 'node-9:26379', 'node-16:26379']
 
 
 with open(sys.argv[1], 'r') as fl:
@@ -44,7 +43,7 @@ for line in content:
     newcontent.append(line)
 
 newcontent.append('[matchmaker_redis]\n')
-newcontent.append('sentinel_hosts=%s\n' % ",".join(SENTINEL_HOSTS))
+newcontent.append('sentinel_hosts=%s\n' % ",".join(common.SENTINEL_HOSTS))
 
 with open(sys.argv[1], 'w') as fl:
     fl.write(''.join(newcontent))
