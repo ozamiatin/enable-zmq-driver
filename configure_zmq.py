@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import argparse
-import subprocess
 from hack_config_with_zmq import SENTINEL_HOSTS
+from hack_config_with_zmq import get_command_output
 
 
 CONTROLLER_PROCS = [
@@ -72,16 +72,6 @@ COMPUTE_CONFIGS = [
 def get_managable_ip_from_node(node):
     return get_command_output("ssh %s 'hostname'" % node)
 
-def get_command_output(cmd):
-    print 'Executing cmd: %s' % cmd
-    pp = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    outp, err = pp.communicate()
-
-    if pp.returncode != 0:
-        raise RuntimeError('Process returned non-zero code %i' % pp.returncode)
-
-    return outp.strip()
-
 
 def restart_processes_on_nodes(nodes, processes):
     for node in sorted(nodes):
@@ -125,7 +115,7 @@ def start_broker_on_nodes(nodes):
                 conf_f.write("[DEFAULT]\n"
                              "rpc_zmq_host=%s\n"
                              "[matchmaker_redis]\n"
-                             "sentinel_hosts=%s" % (node, ",".join(SENTINEL_HOSTS)))
+                             "sentinel_hosts=%s" % (get_managable_ip_from_node(node), ",".join(SENTINEL_HOSTS)))
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
             print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
             print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
