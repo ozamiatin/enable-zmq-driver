@@ -178,6 +178,8 @@ parser.add_argument('--stop-services', dest='stop_services',
                     action='store_true')
 parser.add_argument('--start-services', dest='start_services',
                     action='store_true')
+parser.add_argument('--restart-redis', dest='restart_redis',
+                    action='store_true')
 args = parser.parse_args()
 
 controllers = []
@@ -202,6 +204,10 @@ def main():
 
     if args.start_proxies:
         start_proxy_on_nodes(controllers)
+
+    if args.restart_redis:
+        elaborate_processes_on_nodes(controllers, 'redis-server')
+        elaborate_processes_on_nodes(controllers, 'redis-sentinel')
 
     if args.restart_services:
         hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
