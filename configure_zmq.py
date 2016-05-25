@@ -165,6 +165,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dry-run', dest='dry_run', action='store_true')
 parser.add_argument('--install-packages', dest='install_packages',
                     action='store_true')
+parser.add_argument('--start-proxies', dest='start_proxies',
+                    action='store_true')
 args = parser.parse_args()
 
 controllers = []
@@ -190,7 +192,8 @@ def main():
     hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
     hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
 
-    start_broker_on_nodes(controllers)
+    if args.start_proxies:
+        start_broker_on_nodes(controllers)
 
     restart_resources(controllers[0], PCS_RESOURCES)
 
