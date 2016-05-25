@@ -40,8 +40,7 @@ COMPUTE_PROCS = [
     'neutron-metadata-agent',
     'nova-compute',
     'neutron-openvswitch-agent',
-    'neutron-l3-agent',
-    'neutron-rootwrap'
+    'neutron-l3-agent'
 ]
 
 PCS_RESOURCES = [
@@ -135,7 +134,7 @@ def install_oslo_messaging_package(package_url, package_name, nodes):
     for node in nodes:
         print '\nInstalling %s on %s' % (package_url, node)
         if not args.dry_run:
-            print get_command_output("ssh %s 'wget -q -O /tmp/zmq-package/%s "
+            print get_command_output("ssh %s 'wget -N -O /tmp/zmq-package/%s "
                                      "%s'" % (node, package_name, package_url))
             print get_command_output("ssh %s 'dpkg -i /tmp/zmq-package/%s'" % (node, package_name))
 
