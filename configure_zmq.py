@@ -194,8 +194,9 @@ def main():
         install_oslo_messaging_package(PROXY_PACKAGE_URL, PROXY_PACKAGE_NAME, controllers)
         install_oslo_messaging_package(PROXY_PACKAGE_URL, PROXY_PACKAGE_NAME, computes)
 
-    hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
-    hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
+    if args.restart_services:
+        hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
+        hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
 
     if args.start_proxies:
         start_broker_on_nodes(controllers)
