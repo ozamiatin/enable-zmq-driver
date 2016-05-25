@@ -69,6 +69,9 @@ COMPUTE_CONFIGS = [
 ]
 
 
+def get_managable_ip_from_node(node):
+    return get_command_output("ssh %s 'hostname'" % node).split('\n')[2]
+
 def get_command_output(cmd):
     print 'Executing cmd: %s' % cmd
     pp = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -116,7 +119,7 @@ def hack_configs_on_nodes(nodes, configs):
 def start_broker_on_nodes(nodes):
 
     for node in nodes:
-        print get_command_output("ssh %s 'hostname'" % node)
+        print get_managable_ip_from_node(node)
         if not args.dry_run:
             with open('./zmq-proxy.conf', 'w') as conf_f:
                 conf_f.write("[DEFAULT]\n"
