@@ -7,8 +7,11 @@ import subprocess
 
 RPC_BACKEND = re.compile('^\s*rpc_backend')
 DEFAULT = re.compile('^\s*\[DEFAULT\]\s*$')
+REDIS_SECTION = re.compile('^\s*\[matchmaker_redis\]\s*$')
+SENTINEL_LINE = re.compile('^\s*sentinel_hosts')
 
-IGNORE=['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host', 'default_log_levels']
+IGNORE=['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host',
+        'default_log_levels', 'sentinel_hosts']
 SENTINEL_HOSTS = ['node-10:26379', 'node-9:26379', 'node-16:26379']
 
 
@@ -30,6 +33,7 @@ def main():
 
     newcontent = []
     time_to_put_config = False
+    time_for_redis_config = False
     for line in content:
         ignore = False
         for prefix in IGNORE:
@@ -49,16 +53,21 @@ def main():
             newcontent.append('rpc_zmq_host = %s\n' % get_command_output(
                 "hostname"))
 
-        if RPC_BACKEND.match(line):
+        if time_for_redis_config:
+            time_for_redis_config = False
+            newcontent.append('[matchmaker_redis]\n')
+            newcontent.append('sentinel_hosts=%s\n' % ",".join(SENTINEL_HOSTS))
+
+        if RPC_BACKEND.match(line) or SENTINEL_LINE.match(line):
             continue
 
         if DEFAULT.match(line):
             time_to_put_config = True
 
-        newcontent.append(line)
+        if REDIS_SECTION.match(line):
+            time_for_redis_config = True
 
-    newcontent.append('[matchmaker_redis]\n')
-    newcontent.append('sentinel_hosts=%s\n' % ",".join(SENTINEL_HOSTS))
+        newcontent.append(line)
 
     with open(sys.argv[1], 'w') as fl:
         fl.write(''.join(newcontent))
