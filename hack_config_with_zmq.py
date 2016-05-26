@@ -22,7 +22,7 @@ def get_command_output(cmd):
     outp, err = pp.communicate()
 
     if pp.returncode != 0:
-        raise RuntimeError('Process returned non-zero code %i' % pp.returncode)
+        print ('RuntimeError: Process returned non-zero code %i' % pp.returncode)
 
     return outp.strip()
 
