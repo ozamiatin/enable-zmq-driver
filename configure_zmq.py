@@ -104,7 +104,7 @@ def hack_configs_on_nodes(nodes, configs):
             print 'Editing %s' % conf_file
             if not args.dry_run:
                 print get_command_output("ssh %s 'rm /tmp/hack_config_with_zmq.pyc'" % node)
-                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py %s > /tmp/hack_config_with_zmq.log'" % (node, conf_file))
+                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py %s > /tmp/hack_config_with_zmq.log 2>&1 < /tmp/hack_config_with_zmq.log  &'" % (node, conf_file))
 
 
 def start_proxy_on_nodes(nodes):
@@ -123,9 +123,7 @@ def start_proxy_on_nodes(nodes):
                                      "--config-file=/etc/zmq-proxy.conf > "
                                      "/var/log/zmq-proxy.log 2>&1 < "
                    "/var/log/zmq-proxy.log  &'" % node)
-            print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
-                                     "--config-file=/etc/zmq-proxy.conf > "
-                                     "/var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" % node)
+            print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True --config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" % node)
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
