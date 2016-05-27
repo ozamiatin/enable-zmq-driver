@@ -34,6 +34,7 @@ def main():
     with open(sys.argv[1]+".backup", 'w') as fl:
         fl.write(''.join(content))
 
+    print "We are here!"
     raise RuntimeWarning("We are here!")
 
     newcontent = []
