@@ -19,7 +19,7 @@ CONTROLLER_PROCS = [
     # 'neutron-metadata-agent',
     # 'neutron-ns-metadata-proxy',
     # 'neutron-openvswitch-agent',
-    # 'neutron-server',
+     'neutron-server',
 
     'cinder-api',
     'cinder-backup',
@@ -49,7 +49,6 @@ PCS_RESOURCES = [
     'neutron-l3-agent',
     'neutron-metadata-agent',
     'neutron-dhcp-agent',
-    'neutron-server'
     'p_heat-engine'
 ]
 
