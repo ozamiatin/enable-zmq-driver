@@ -34,9 +34,6 @@ def main():
     with open(sys.argv[1]+".backup", 'w') as fl:
         fl.write(''.join(content))
 
-    print "We are here!"
-    raise RuntimeWarning("We are here!")
-
     newcontent = []
     time_to_put_config = False
     for line in content:
@@ -73,5 +70,5 @@ def main():
         fl.write(''.join(newcontent))
 
 
-if __name__=="__MAIN__":
+if __name__=="__main__":
     main()
