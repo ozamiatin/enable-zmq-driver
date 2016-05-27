@@ -170,6 +170,12 @@ def install_oslo_messaging_package(package_url, package_name, nodes):
             print get_command_output("ssh %s 'dpkg -i /tmp/zmq-package/%s'" % (node, package_name))
 
 
+def apt_install_package(nodes, package_name):
+    for node in nodes:
+        print '\nInstalling %s on %s' % (package_name, node)
+        print get_command_output("ssh %s 'apt-get install %s'" % (node, package_name))
+
+
 def detect_roles():
     global controllers, computes
     fuel_columns_count = int(get_command_output("fuel nodes 2>&1 | grep controller | awk '{ print NF }'").split('\n')[0])
@@ -210,6 +216,9 @@ parser.add_argument('--hack-configs', dest='hack_configs',
                     action='store_true')
 parser.add_argument('--clear-logs', dest='clear_logs',
                     action='store_true')
+parser.add_argument('--install-pyredis', dest='install_pyredis',
+                    action='store_true')
+
 args = parser.parse_args()
 
 controllers = []
@@ -225,6 +234,9 @@ def main():
 
     print ("Detected controllers: %s" % controllers)
     print ("Detected computes: %s" % computes)
+
+    if args.install_pyredis:
+        apt_install_package(computes, "python-redis")
 
     if args.clear_logs:
         clear_logs_on_nodes(controllers, CONTROLLER_LOGS)
