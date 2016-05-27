@@ -49,6 +49,7 @@ PCS_RESOURCES = [
     'neutron-l3-agent',
     'neutron-metadata-agent',
     'neutron-dhcp-agent',
+    'neutron-server'
     'p_heat-engine'
 ]
 
