@@ -79,7 +79,7 @@ CONTROLLER_LOGS = [
     '/var/log/glance/*.log*',
     '/var/log/heat*.log*',
     '/var/log/heat/*.log*',
-    '/var/log/zmq-proxy.log'
+#    '/var/log/zmq-proxy.log'
 ]
 
 COMPUTE_LOGS = [
