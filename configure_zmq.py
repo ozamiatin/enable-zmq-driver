@@ -188,6 +188,9 @@ def detect_roles():
         controllers = controllers[:1]
         computes = computes[:2]
 
+def firewall_ports_open(nodes):
+    "iptables -A INPUT -p tcp --match multiport --dports 1000:65535 -j ACCEPT"
+
 
 BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
 EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
@@ -217,6 +220,13 @@ parser.add_argument('--hack-configs', dest='hack_configs',
 parser.add_argument('--clear-logs', dest='clear_logs',
                     action='store_true')
 parser.add_argument('--install-pyredis', dest='install_pyredis',
+                    action='store_true')
+
+parser.add_argument('--restart-resources', dest='restart_resources',
+                    action='store_true')
+parser.add_argument('--restart-controller-proc', dest='restart_controller_proc',
+                    action='store_true')
+parser.add_argument('--restart-computes', dest='restart_computes',
                     action='store_true')
 
 args = parser.parse_args()
@@ -270,6 +280,16 @@ def main():
         elaborate_resources(controllers[0], PCS_RESOURCES, 'start')
         elaborate_processes_on_nodes(controllers, CONTROLLER_PROCS, 'start')
         elaborate_processes_on_nodes(computes, COMPUTE_PROCS, 'start')
+
+
+    if args.restart_resources:
+        elaborate_resources(controllers[0], PCS_RESOURCES, 'restart')
+
+    if args.restart_controller_proc:
+        elaborate_processes_on_nodes(controllers, CONTROLLER_PROCS, 'restart')
+
+    if args.restart_computes:
+        elaborate_processes_on_nodes(computes, COMPUTE_PROCS, 'restart')
 
 if __name__ == "__main__":
     main()
