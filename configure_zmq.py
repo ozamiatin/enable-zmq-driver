@@ -175,6 +175,8 @@ parser.add_argument('--start-services', dest='start_services',
                     action='store_true')
 parser.add_argument('--restart-redis', dest='restart_redis',
                     action='store_true')
+parser.add_argument('--hack-configs', dest='hack_configs',
+                    action='store_true')
 args = parser.parse_args()
 
 controllers = []
@@ -203,9 +205,11 @@ def main():
     if args.restart_redis:
         elaborate_processes_on_nodes(controllers, ['redis-server'])
 
-    if args.restart_services:
+    if args.hack_configs:
         hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
         hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
+
+    if args.restart_services:
         elaborate_resources(controllers[0], PCS_RESOURCES, 'restart')
         elaborate_processes_on_nodes(controllers, CONTROLLER_PROCS, 'restart')
         elaborate_processes_on_nodes(computes, COMPUTE_PROCS, 'restart')
