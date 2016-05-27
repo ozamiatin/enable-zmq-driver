@@ -92,9 +92,7 @@ def elaborate_resources(node, resources, action='restart'):
     for res in resources:
         print 'Elaborating resource %s' % res
         if not args.dry_run:
-            print get_command_output("ssh %s 'crm resource %s %s'" % (node,
-                                                                      action,
-                                                                      res))
+            print get_command_output("ssh %s 'crm resource %s %s'" % (node, action, res))
 
 
 def hack_configs_on_nodes(nodes, configs):
@@ -106,7 +104,7 @@ def hack_configs_on_nodes(nodes, configs):
             print 'Editing %s' % conf_file
             if not args.dry_run:
                 print get_command_output("ssh %s 'rm /tmp/hack_config_with_zmq.pyc'" % node)
-                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py %s'" % (node, conf_file))
+                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py %s > /tmp/hack_config_with_zmq.log'" % (node, conf_file))
 
 
 def start_proxy_on_nodes(nodes):
