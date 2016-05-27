@@ -107,7 +107,7 @@ def hack_configs_on_nodes(nodes, configs):
         for conf_file in configs:
             print 'Editing %s' % conf_file
             if not args.dry_run:
-                print get_command_output("ssh %s 'rm /tmp/hack_config_with_zmq.pyc'")
+                print get_command_output("ssh %s 'rm /tmp/hack_config_with_zmq.pyc'" % node)
                 print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py %s'" % (node, conf_file))
 
 
