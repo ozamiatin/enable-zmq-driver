@@ -33,7 +33,6 @@ def main():
 
     newcontent = []
     time_to_put_config = False
-    time_for_redis_config = False
     for line in content:
         ignore = False
         for prefix in IGNORE:
@@ -53,21 +52,17 @@ def main():
             newcontent.append('rpc_zmq_host = %s\n' % get_command_output(
                 "hostname"))
 
-        if time_for_redis_config:
-            time_for_redis_config = False
-            newcontent.append('[matchmaker_redis]\n')
-            newcontent.append('sentinel_hosts=%s\n' % ",".join(SENTINEL_HOSTS))
 
-        if RPC_BACKEND.match(line) or SENTINEL_LINE.match(line):
+        if RPC_BACKEND.match(line) or SENTINEL_LINE.match(line) or REDIS_SECTION.match(line):
             continue
 
         if DEFAULT.match(line):
             time_to_put_config = True
 
-        if REDIS_SECTION.match(line):
-            time_for_redis_config = True
-
         newcontent.append(line)
+
+    newcontent.append('[matchmaker_redis]\n')
+    newcontent.append('sentinel_hosts=%s\n' % ",".join(SENTINEL_HOSTS))
 
     with open(sys.argv[1], 'w') as fl:
         fl.write(''.join(newcontent))
