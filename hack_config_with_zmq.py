@@ -31,6 +31,9 @@ def main():
     with open(sys.argv[1], 'r') as fl:
         content = fl.readlines()
 
+    with open(sys.argv[1]+".backup", 'w') as fl:
+        fl.write(''.join(content))
+
     newcontent = []
     time_to_put_config = False
     for line in content:
@@ -49,8 +52,7 @@ def main():
             newcontent.append('default_log_levels=amqp=WARN,amqplib=WARN,boto=WARN,iso8601=WARN,keystonemiddleware=WARN,oslo.messaging=DEBUG,oslo_messaging=DEBUG,qpid=WARN,requests.packages.urllib3.connectionpool=WARN,requests.packages.urllib3.util.retry=WARN,routes.middleware=WARN,sqlalchemy=WARN,stevedore=WARN,suds=INFO,taskflow=WARN,urllib3.connectionpool=WARN,urllib3.util.retry=WARN,websocket=WARN\n')
             newcontent.append('rpc_backend = zmq\n')
             newcontent.append('rpc_zmq_matchmaker = redis\n')
-            newcontent.append('rpc_zmq_host = %s\n' % get_command_output(
-                "hostname"))
+            newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
 
 
         if RPC_BACKEND.match(line) or SENTINEL_LINE.match(line) or REDIS_SECTION.match(line):

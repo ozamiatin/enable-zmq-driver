@@ -84,9 +84,7 @@ def elaborate_processes_on_nodes(nodes, processes, action='restart'):
             if args.dry_run:
                 print "ssh %s 'service %s %s'" % (node, proc, action)
             else:
-                print get_command_output("ssh %s 'service %s %s'" % (node,
-                                                                     proc,
-                                                                     action))
+                print get_command_output("ssh %s 'service %s %s'" % (node, proc, action))
 
 
 def elaborate_resources(node, resources, action='restart'):
