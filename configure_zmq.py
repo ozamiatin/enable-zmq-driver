@@ -68,6 +68,27 @@ COMPUTE_CONFIGS = [
     '/etc/neutron/neutron.conf',
 ]
 
+CONTROLLER_LOGS = [
+    '/var/log/nova*.log*',
+    '/var/log/nova/*.log*',
+    '/var/log/neutron*.log*',
+    '/var/log/neutron/*.log*',
+    '/var/log/cinder*.log*',
+    '/var/log/cinder/*.log*',
+    '/var/log/glance*.log*',
+    '/var/log/glance/*.log*',
+    '/var/log/heat*.log*',
+    '/var/log/heat/*.log*',
+    '/var/log/zmq-proxy.log'
+]
+
+COMPUTE_LOGS = [
+    '/var/log/nova*.log*',
+    '/var/log/nova/*.log*',
+    '/var/log/neutron*.log*',
+    '/var/log/neutron/*.log*'
+]
+
 
 def get_managable_ip_from_node(node):
     return get_command_output("ssh %s 'hostname'" % node)
@@ -93,6 +114,16 @@ def elaborate_resources(node, resources, action='restart'):
         print 'Elaborating resource %s' % res
         if not args.dry_run:
             print get_command_output("ssh %s 'crm resource %s %s'" % (node, action, res))
+
+
+def clear_logs_on_nodes(nodes, logs):
+    for node in nodes:
+        print '\nClearing logs on %s' % node
+
+        for log_pattern in logs:
+            print 'Removing %s' % log_pattern
+            if not args.dry_run:
+                print get_command_output("ssh %s 'rm %s'" % (node, log_pattern))
 
 
 def hack_configs_on_nodes(nodes, configs):
@@ -177,6 +208,8 @@ parser.add_argument('--restart-redis', dest='restart_redis',
                     action='store_true')
 parser.add_argument('--hack-configs', dest='hack_configs',
                     action='store_true')
+parser.add_argument('--clear-logs', dest='clear_logs',
+                    action='store_true')
 args = parser.parse_args()
 
 controllers = []
@@ -192,6 +225,10 @@ def main():
 
     print ("Detected controllers: %s" % controllers)
     print ("Detected computes: %s" % computes)
+
+    if args.clear_logs:
+        clear_logs_on_nodes(controllers, CONTROLLER_LOGS)
+        clear_logs_on_nodes(computes, COMPUTE_LOGS)
 
     if args.install_packages:
         install_oslo_messaging_package(PACKAGE_URL, PACKAGE_NAME, controllers)
