@@ -159,7 +159,6 @@ def start_proxy_on_nodes(nodes):
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
 
-
 def install_oslo_messaging_package(package_url, package_name, nodes):
 
     for node in nodes:

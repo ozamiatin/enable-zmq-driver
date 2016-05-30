@@ -53,6 +53,7 @@ def main():
             newcontent.append('rpc_backend = zmq\n')
             newcontent.append('rpc_zmq_matchmaker = redis\n')
             newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
+            newcontent.append('use_router_proxy = false\n')
 
 
         if RPC_BACKEND.match(line) or SENTINEL_LINE.match(line) or REDIS_SECTION.match(line):
