@@ -188,8 +188,10 @@ def detect_roles():
         controllers = controllers[:1]
         computes = computes[:2]
 
-def firewall_ports_open(nodes):
-    "iptables -A INPUT -p tcp --match multiport --dports 1000:65535 -j ACCEPT"
+
+def firewall_ports_open(nodes, min_port, max_port):
+    for node in nodes:
+        get_command_output("ssh %s 'iptables -A INPUT -p tcp --match multiport --dports %d:%d -j ACCEPT'" % (node, min_port, max_port))
 
 
 BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
@@ -227,6 +229,8 @@ parser.add_argument('--restart-resources', dest='restart_resources',
 parser.add_argument('--restart-controller-proc', dest='restart_controller_proc',
                     action='store_true')
 parser.add_argument('--restart-computes', dest='restart_computes',
+                    action='store_true')
+parser.add_argument('--firewall-open', dest='firewall_open',
                     action='store_true')
 
 args = parser.parse_args()
@@ -290,6 +294,10 @@ def main():
 
     if args.restart_computes:
         elaborate_processes_on_nodes(computes, COMPUTE_PROCS, 'restart')
+
+    if args.firewall_open:
+        firewall_ports_open(controllers, 49152, 65535)
+        firewall_ports_open(computes, 49152, 65535)
 
 if __name__ == "__main__":
     main()
