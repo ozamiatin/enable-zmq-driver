@@ -193,6 +193,15 @@ def firewall_ports_open(nodes, min_port, max_port):
         get_command_output("ssh %s 'iptables -A INPUT -p tcp --match multiport --dports %d:%d -j ACCEPT'" % (node, min_port, max_port))
 
 
+def restart_redis():
+    elaborate_processes_on_nodes(controllers, ['redis-server'])
+
+
+def deploy_redis_sentinel():
+    for node in controllers:
+
+
+
 BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
 EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
@@ -214,8 +223,6 @@ parser.add_argument('--stop-services', dest='stop_services',
                     action='store_true')
 parser.add_argument('--start-services', dest='start_services',
                     action='store_true')
-parser.add_argument('--restart-redis', dest='restart_redis',
-                    action='store_true')
 parser.add_argument('--hack-configs', dest='hack_configs',
                     action='store_true')
 parser.add_argument('--clear-logs', dest='clear_logs',
@@ -230,6 +237,11 @@ parser.add_argument('--restart-controller-proc', dest='restart_controller_proc',
 parser.add_argument('--restart-computes', dest='restart_computes',
                     action='store_true')
 parser.add_argument('--firewall-open', dest='firewall_open',
+                    action='store_true')
+
+parser.add_argument('--deploy-redis-sentinel', dest='deploy_redis_sentinel',
+                    action='store_true')
+parser.add_argument('--restart-redis', dest='restart_redis',
                     action='store_true')
 
 args = parser.parse_args()
@@ -265,7 +277,7 @@ def main():
         start_proxy_on_nodes(controllers)
 
     if args.restart_redis:
-        elaborate_processes_on_nodes(controllers, ['redis-server'])
+        restart_redis()
 
     if args.hack_configs:
         hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
