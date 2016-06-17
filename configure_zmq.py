@@ -197,11 +197,6 @@ def restart_redis():
     elaborate_processes_on_nodes(controllers, ['redis-server'])
 
 
-def deploy_redis_sentinel():
-    for node in controllers:
-
-
-
 BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
 EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
