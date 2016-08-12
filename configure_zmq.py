@@ -140,9 +140,8 @@ def start_proxy_on_nodes(nodes):
         print get_managable_ip_from_node(node)
         if not args.dry_run:
             print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
-            print get_command_output('scp generate_proxy_config.py %s:/tmp' % node)
 
-            print get_command_output("ssh %s 'python /tmp/generate_proxy_config.py'" % node)
+            print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py hack'" % node)
 
             print ("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
                                      "--config-file=/etc/zmq-proxy.conf > "
@@ -158,8 +157,8 @@ def start_proxy_on_nodes_venv(nodes):
     for node in nodes:
         print get_managable_ip_from_node(node)
         if not args.dry_run:
-            print get_command_output('scp generate_proxy_config.py %s:/tmp' % node)
-            print get_command_output("ssh %s 'python /tmp/generate_proxy_config.py'" % node)
+            print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
+            print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate'" % node)
 
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
             print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
