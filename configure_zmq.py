@@ -178,7 +178,7 @@ def start_proxy_on_nodes_venv(nodes):
                                      "pip install setuptools && "
                                      "pip install eventlet PyYAML oslo.messaging petname redis zmq && "
                                      "pip install /tmp/oslo.messaging && "
-                                     "oslo-messaging-zmq-proxy --debug True --frontend-port 50001 --backend-port 50002 --publisher-port 50003 --config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" % node)
+                                     "oslo-messaging-zmq-proxy --debug True --frontend-port 50001 --backend-port 50002 --publisher-port 50003 --config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log'" % node)
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
