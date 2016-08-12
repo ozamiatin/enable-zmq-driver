@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import argparse
-from hack_config_with_zmq import SENTINEL_HOSTS
+from hack_config_with_zmq import REDIS_HOST
 from hack_config_with_zmq import get_command_output
 
 
@@ -144,17 +144,17 @@ def start_proxy_on_nodes(nodes):
         print get_managable_ip_from_node(node)
         if not args.dry_run:
             with open('./zmq-proxy.conf', 'w') as conf_f:
-                conf_f.write("[DEFAULT]\n"
+                conf_f.write("[oslo_messaging_zmq]\n"
                              "rpc_zmq_host=%s\n"
                              "[matchmaker_redis]\n"
-                             "sentinel_hosts=%s" % (get_managable_ip_from_node(node), ",".join(SENTINEL_HOSTS)))
+                             "host=%s" % (get_managable_ip_from_node(node), REDIS_HOST))
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
             print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
             print ("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
                                      "--config-file=/etc/zmq-proxy.conf > "
                                      "/var/log/zmq-proxy.log 2>&1 < "
                    "/var/log/zmq-proxy.log  &'" % node)
-            print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True --config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" % node)
+            print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True --frontend-port 50001 --backend-port 50002 --publisher-port 50003 --config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" % node)
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
@@ -200,11 +200,14 @@ def restart_redis():
 BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
 EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
-PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos7_all.deb"
-PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos7_all.deb"
 
-PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos7_all.deb"
-PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos7_all.deb"
+
+PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos9_all.deb"
+PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos9_all.deb"
+
+PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos9_all.deb"
+PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos9_all.deb"
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dry-run', dest='dry_run', action='store_true')
