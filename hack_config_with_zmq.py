@@ -27,7 +27,7 @@ def get_command_output(cmd):
 
 
 def generate_proxy_conf():
-    with open('/tmp/zmq-proxy.conf', 'w+') as conf_f:
+    with open('/tmp/zmq.conf', 'w+') as conf_f:
         conf_f.write("[oslo_messaging_zmq]\n"
                      "rpc_zmq_host=%s\n"
                      "[matchmaker_redis]\n"
