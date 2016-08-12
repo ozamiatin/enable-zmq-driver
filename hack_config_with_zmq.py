@@ -26,15 +26,23 @@ def get_command_output(cmd):
     return outp.strip()
 
 
+def generate_proxy_conf():
+    with open('./zmq-proxy.conf', 'w') as conf_f:
+        conf_f.write("[oslo_messaging_zmq]\n"
+                     "rpc_zmq_host=%s\n"
+                     "[matchmaker_redis]\n"
+                     "host=%s" % (get_command_output("hostname"), REDIS_HOST))
+
+
 def get_managable_ip_from_node(node):
     return get_command_output("ssh %s 'hostname'" % node)
 
 
 def main():
-    with open(sys.argv[1], 'r') as fl:
+    with open(sys.argv[2], 'r') as fl:
         content = fl.readlines()
 
-    with open(sys.argv[1]+".backup", 'w') as fl:
+    with open(sys.argv[2]+".backup", 'w') as fl:
         fl.write(''.join(content))
 
     newcontent = []
@@ -72,4 +80,7 @@ def main():
 
 
 if __name__=="__main__":
-    main()
+    if sys.argv[1] == "generate":
+        generate_proxy_conf()
+    else:
+        main()
