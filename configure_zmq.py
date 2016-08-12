@@ -138,16 +138,20 @@ def hack_configs_on_nodes(nodes, configs):
                 print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py %s > /tmp/hack_config_with_zmq.log 2>&1 < /tmp/hack_config_with_zmq.log  &'" % (node, conf_file))
 
 
+def generate_proxy_conf(node):
+    with open('./zmq-proxy.conf', 'w') as conf_f:
+        conf_f.write("[oslo_messaging_zmq]\n"
+                     "rpc_zmq_host=%s\n"
+                     "[matchmaker_redis]\n"
+                     "host=%s" % (get_managable_ip_from_node(node), REDIS_HOST))
+
+
 def start_proxy_on_nodes(nodes):
 
     for node in nodes:
         print get_managable_ip_from_node(node)
         if not args.dry_run:
-            with open('./zmq-proxy.conf', 'w') as conf_f:
-                conf_f.write("[oslo_messaging_zmq]\n"
-                             "rpc_zmq_host=%s\n"
-                             "[matchmaker_redis]\n"
-                             "host=%s" % (get_managable_ip_from_node(node), REDIS_HOST))
+            generate_proxy_conf(node)
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
             print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
             print ("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
@@ -155,6 +159,21 @@ def start_proxy_on_nodes(nodes):
                                      "/var/log/zmq-proxy.log 2>&1 < "
                    "/var/log/zmq-proxy.log  &'" % node)
             print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True --frontend-port 50001 --backend-port 50002 --publisher-port 50003 --config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" % node)
+        else:
+            print '\nStarting oslo-messaging-zmq-proxy on %s' % node
+
+
+def start_proxy_on_nodes_venv(nodes):
+
+    for node in nodes:
+        print get_managable_ip_from_node(node)
+        if not args.dry_run:
+            generate_proxy_conf(node)
+            print '\nStarting oslo-messaging-zmq-proxy on %s' % node
+            print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
+
+            print get_command_output("ssh %s 'git clone https://git.openstack.org/openstack/oslo.messaging /tmp/oslo.messaging && cd /tmp/oslo.messaging && git fetch https://git.openstack.org/openstack/oslo.messaging refs/changes/79/352579/14 && git checkout FETCH_HEAD'" % node)
+            print get_command_output("ssh %s 'virtualenv /tmp/venv && . /tmp/venv/bin/activate && pip install /tmp/oslo.messaging && pip install -r /tmp/oslo.messaging/test-requirements && oslo-messaging-zmq-proxy --debug True --frontend-port 50001 --backend-port 50002 --publisher-port 50003 --config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" % node)
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
@@ -216,6 +235,8 @@ parser.add_argument('--install-packages', dest='install_packages',
                     action='store_true')
 parser.add_argument('--start-proxies', dest='start_proxies',
                     action='store_true')
+parser.add_argument('--start-proxies-venv', dest='start_proxies_venv',
+                    action='store_true')
 parser.add_argument('--restart-services', dest='restart_services',
                     action='store_true')
 parser.add_argument('--stop-services', dest='stop_services',
@@ -274,6 +295,9 @@ def main():
 
     if args.start_proxies:
         start_proxy_on_nodes(controllers)
+
+    if args.start_proxies_venv:
+        start_proxy_on_nodes_venv(controllers)
 
     if args.restart_redis:
         restart_redis()
