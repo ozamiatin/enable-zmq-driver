@@ -5,6 +5,8 @@ import sys
 import subprocess
 
 
+REDIS_HOST = "node-16"
+
 RPC_BACKEND = re.compile('^\s*rpc_backend')
 DEFAULT = re.compile('^\s*\[DEFAULT\]\s*$')
 REDIS_SECTION = re.compile('^\s*\[matchmaker_redis\]\s*$')
@@ -12,8 +14,6 @@ ZMQ_SECTION = re.compile('^\s*\[oslo_messaging_zmq\]\s*$')
 
 IGNORE=['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host',
         'default_log_levels', 'sentinel_hosts']
-
-REDIS_HOST = "node-16"
 
 def get_command_output(cmd):
     print 'Executing cmd: %s' % cmd
@@ -24,6 +24,10 @@ def get_command_output(cmd):
         print ('RuntimeError: Process returned non-zero code %i' % pp.returncode)
 
     return outp.strip()
+
+
+def get_managable_ip_from_node(node):
+    return get_command_output("ssh %s 'hostname'" % node)
 
 
 def main():
