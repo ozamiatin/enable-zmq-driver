@@ -173,7 +173,7 @@ def start_proxy_on_nodes_venv(nodes):
             print get_command_output('scp zmq-proxy.conf %s:/etc' % node)
 
             print get_command_output("ssh %s 'rm -rf /tmp/venv /tmp/oslo.messaging && git clone https://git.openstack.org/openstack/oslo.messaging /tmp/oslo.messaging && cd /tmp/oslo.messaging && git fetch https://git.openstack.org/openstack/oslo.messaging refs/changes/79/352579/14 && git checkout FETCH_HEAD'" % node)
-            print get_command_output("ssh %s 'mkdir /tmp/venv && cd /tmp/venv && virtualenv --no-setuptools . && "
+            print get_command_output("ssh -f %s 'mkdir /tmp/venv && cd /tmp/venv && virtualenv --no-setuptools . && "
                                      ". /tmp/venv/bin/activate && "
                                      "pip install setuptools && "
                                      "pip install eventlet PyYAML oslo.messaging petname redis zmq && "
