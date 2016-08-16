@@ -162,6 +162,7 @@ def start_proxy_on_nodes_venv(nodes):
 
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
+            print get_command_output("ssh %s 'apt-get update && apt-get -y install git python-pip virtualenv python-dev'" % node)
             print get_command_output("ssh %s 'rm -rf /tmp/venv /tmp/oslo.messaging && git clone https://git.openstack.org/openstack/oslo.messaging /tmp/oslo.messaging && cd /tmp/oslo.messaging && git fetch https://git.openstack.org/openstack/oslo.messaging refs/changes/79/352579/23 && git checkout FETCH_HEAD'" % node)
             print get_command_output("ssh %s 'mkdir /tmp/venv && cd /tmp/venv && virtualenv --no-setuptools . && "
                                      ". /tmp/venv/bin/activate && "
