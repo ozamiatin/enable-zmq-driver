@@ -145,7 +145,7 @@ def hack_configs_on_nodes(nodes, configs):
             print 'Editing %s' % conf_file
             if not args.dry_run:
                 print get_command_output("ssh %s 'rm /tmp/hack_config_with_zmq.pyc'" % node)
-                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py %s "
+                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py hack %s "
                                          "> /tmp/hack_config_with_zmq.log 2>&1 < /tmp/hack_config_with_zmq.log  &'" % (node, conf_file))
 
 
@@ -154,7 +154,7 @@ def generate_config_for_proxy(node):
     print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate'" % node)
 
 
-def start_proxy_on_nodes(nodes, debug=False):
+def start_proxy_on_nodes(nodes, debug=True):
 
     for node in nodes:
         print get_managable_ip_from_node(node)

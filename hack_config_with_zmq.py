@@ -40,10 +40,11 @@ def get_managable_ip_from_node(node):
 
 
 def main():
-    with open(sys.argv[2], 'r') as fl:
+    file_name = sys.argv[2]
+    with open(file_name, 'r') as fl:
         content = fl.readlines()
 
-    with open(sys.argv[2]+".backup", 'w') as fl:
+    with open(file_name+".backup", 'w') as fl:
         fl.write(''.join(content))
 
     newcontent = []
@@ -79,7 +80,7 @@ def main():
     newcontent.append('[matchmaker_redis]')
     newcontent.append('host=%s' % REDIS_HOST)
 
-    with open(sys.argv[2], 'w') as fl:
+    with open(file_name, 'w') as fl:
         fl.write(''.join(newcontent))
 
 
