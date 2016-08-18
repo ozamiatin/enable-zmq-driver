@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import os
 import re
 import sys
 import subprocess
@@ -44,8 +45,9 @@ def main():
     with open(file_name, 'r') as fl:
         content = fl.readlines()
 
-    with open(file_name+".backup", 'w') as fl:
-        fl.write(''.join(content))
+    if not os.path.isfile(file_name+".backup"):
+        with open(file_name+".backup", 'w') as fl:
+            fl.write(''.join(content))
 
     newcontent = []
     time_to_put_config = False
