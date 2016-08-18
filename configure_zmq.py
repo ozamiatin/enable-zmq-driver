@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import argparse
-from hack_config_with_zmq import REDIS_HOST
 from hack_config_with_zmq import get_command_output
 from hack_config_with_zmq import get_managable_ip_from_node
 
@@ -90,6 +89,21 @@ COMPUTE_LOGS = [
 ]
 
 
+
+
+PROXY_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
+EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
+
+PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos9_all.deb"
+PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos9_all.deb"
+
+PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos9_all.deb"
+PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos9_all.deb"
+
+
+PATCH_SET = "refs/changes/79/352579/23"
+
+
 def elaborate_processes_on_nodes(nodes, processes, action='restart'):
     for node in sorted(nodes):
         if not node:
@@ -131,45 +145,59 @@ def hack_configs_on_nodes(nodes, configs):
             print 'Editing %s' % conf_file
             if not args.dry_run:
                 print get_command_output("ssh %s 'rm /tmp/hack_config_with_zmq.pyc'" % node)
-                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py %s > /tmp/hack_config_with_zmq.log 2>&1 < /tmp/hack_config_with_zmq.log  &'" % (node, conf_file))
+                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py %s "
+                                         "> /tmp/hack_config_with_zmq.log 2>&1 < /tmp/hack_config_with_zmq.log  &'" % (node, conf_file))
 
 
-def start_proxy_on_nodes(nodes):
+def generate_config_for_proxy(node):
+    print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
+    print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate'" % node)
+
+
+def start_proxy_on_nodes(nodes, debug=False):
 
     for node in nodes:
         print get_managable_ip_from_node(node)
         if not args.dry_run:
-            print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
+            generate_config_for_proxy(node)
 
-            print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py hack'" % node)
-
-            print ("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True "
-                                     "--config-file=/etc/zmq-proxy.conf > "
-                                     "/var/log/zmq-proxy.log 2>&1 < "
-                   "/var/log/zmq-proxy.log  &'" % node)
-            print get_command_output("ssh %s 'nohup oslo-messaging-zmq-proxy --debug True --frontend-port 50001 --backend-port 50002 --publisher-port 50003 --config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" % node)
+            print get_command_output("ssh %(node)s 'nohup oslo-messaging-zmq-proxy %(debug)s "
+                                     "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
+                                     "--config-file=/etc/zmq-proxy/zmq.conf "
+                                     "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" %
+                                     {"node": node,
+                                      "debug": "--debug True" if debug else "--debug False"})
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
 
-def start_proxy_on_nodes_venv(nodes):
+def start_proxy_on_nodes_venv(nodes, debug=False):
 
     for node in nodes:
         print get_managable_ip_from_node(node)
         if not args.dry_run:
-            print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
-            print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate'" % node)
+            generate_config_for_proxy(node)
 
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
             print get_command_output("ssh %s 'apt-get update && apt-get -y install git python-pip virtualenv python-dev'" % node)
-            print get_command_output("ssh %s 'rm -rf /tmp/venv /tmp/oslo.messaging && git clone https://git.openstack.org/openstack/oslo.messaging /tmp/oslo.messaging && cd /tmp/oslo.messaging && git fetch https://git.openstack.org/openstack/oslo.messaging refs/changes/79/352579/23 && git checkout FETCH_HEAD'" % node)
+            print get_command_output("ssh %(node)s 'rm -rf /tmp/venv /tmp/oslo.messaging "
+                                     "&& git clone https://git.openstack.org/openstack/oslo.messaging /tmp/oslo.messaging "
+                                     "&& cd /tmp/oslo.messaging "
+                                     "&& git fetch https://git.openstack.org/openstack/oslo.messaging %(patch)s "
+                                     "&& git checkout FETCH_HEAD'" % {"node": node, "patch": PATCH_SET})
             print get_command_output("ssh %s 'mkdir /tmp/venv && cd /tmp/venv && virtualenv --no-setuptools . && "
                                      ". /tmp/venv/bin/activate && "
                                      "pip install setuptools && "
                                      "pip install eventlet PyYAML oslo.messaging petname redis zmq && "
                                      "pip install /tmp/oslo.messaging'" % node)
-            print get_command_output("ssh %s '. /tmp/venv/bin/activate && nohup oslo-messaging-zmq-proxy --debug True --frontend-port 50001 --backend-port 50002 --publisher-port 50003 --config-file=/etc/zmq-proxy.conf > /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &'" % node)
+
+            print get_command_output("ssh %(node)s '. /tmp/venv/bin/activate && nohup oslo-messaging-zmq-proxy %(debug)s "
+                                     "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
+                                     "--config-file=/etc/zmq-proxy/zmq.conf "
+                                     "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &'" %
+                                     {"node": node,
+                                      "debug": "--debug True" if debug else "--debug False"})
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
@@ -211,18 +239,6 @@ def firewall_ports_open(nodes, min_port, max_port):
 
 def restart_redis():
     elaborate_processes_on_nodes(controllers, ['redis-server'])
-
-
-BROKER_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
-EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
-
-
-
-PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos9_all.deb"
-PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos9_all.deb"
-
-PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos9_all.deb"
-PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos9_all.deb"
 
 
 parser = argparse.ArgumentParser()
