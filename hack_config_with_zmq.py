@@ -62,7 +62,8 @@ def main():
 
             newcontent.append('debug = True\n')
             newcontent.append('default_log_levels=amqp=WARN,amqplib=WARN,boto=WARN,iso8601=WARN,keystonemiddleware=WARN,oslo.messaging=DEBUG,oslo_messaging=DEBUG,qpid=WARN,requests.packages.urllib3.connectionpool=WARN,requests.packages.urllib3.util.retry=WARN,routes.middleware=WARN,sqlalchemy=WARN,stevedore=WARN,suds=INFO,taskflow=WARN,urllib3.connectionpool=WARN,urllib3.util.retry=WARN,websocket=WARN\n')
-            newcontent.append('transport_url = zmq+redis://%s:6379\n' % REDIS_HOST)
+            newcontent.append('rpc_backend = zmq\n')
+            #newcontent.append('transport_url = zmq+redis://%s:6379\n' % REDIS_HOST)
 
         if RPC_BACKEND.match(line) or REDIS_SECTION.match(line) or ZMQ_SECTION.match(line):
             continue
@@ -75,6 +76,9 @@ def main():
     newcontent.append('[oslo_messaging_zmq]')
     newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
     newcontent.append('use_router_proxy = true\n')
+    newcontent.append('rpc_zmq_matchmaker = redis\n')
+    newcontent.append('[matchmaker_redis]')
+    newcontent.append('host=%s' % REDIS_HOST)
 
     with open(sys.argv[1], 'w') as fl:
         fl.write(''.join(newcontent))
