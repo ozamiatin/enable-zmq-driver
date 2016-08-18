@@ -27,6 +27,7 @@ def get_command_output(cmd):
 
 
 def generate_proxy_conf():
+    get_command_output("mkdir /etc/zmq-proxy/")
     with open('/etc/zmq-proxy/zmq.conf', 'w+') as conf_f:
         conf_f.write("[oslo_messaging_zmq]\n"
                      "rpc_zmq_host=%s\n"
