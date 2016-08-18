@@ -75,12 +75,12 @@ def main():
 
         newcontent.append(line)
 
-    newcontent.append('[oslo_messaging_zmq]')
+    newcontent.append('[oslo_messaging_zmq]\n')
     newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
     newcontent.append('use_router_proxy = true\n')
     newcontent.append('rpc_zmq_matchmaker = redis\n')
-    newcontent.append('[matchmaker_redis]')
-    newcontent.append('host=%s' % REDIS_HOST)
+    newcontent.append('[matchmaker_redis]\n')
+    newcontent.append('host=%s\n' % REDIS_HOST)
 
     with open(file_name, 'w') as fl:
         fl.write(''.join(newcontent))
