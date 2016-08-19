@@ -154,7 +154,7 @@ def generate_config_for_proxy(node):
     print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate'" % node)
 
 
-def start_proxy_on_nodes(nodes, debug=True):
+def start_proxy_on_nodes(nodes, debug=False):
 
     for node in nodes:
         print get_managable_ip_from_node(node)
@@ -166,7 +166,7 @@ def start_proxy_on_nodes(nodes, debug=True):
                                      "--config-file=/etc/zmq-proxy/zmq.conf "
                                      "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" %
                                      {"node": node,
-                                      "debug": "--debug True" if debug else "--debug False"})
+                                      "debug": "--debug True" if debug else ""})
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
@@ -197,7 +197,7 @@ def start_proxy_on_nodes_venv(nodes, debug=False):
                                      "--config-file=/etc/zmq-proxy/zmq.conf "
                                      "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &'" %
                                      {"node": node,
-                                      "debug": "--debug True" if debug else "--debug False"})
+                                      "debug": "--debug True" if debug else ""})
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
@@ -304,6 +304,7 @@ def main():
         install_oslo_messaging_package(PACKAGE_URL, PACKAGE_NAME, computes)
         install_oslo_messaging_package(PROXY_PACKAGE_URL, PROXY_PACKAGE_NAME, controllers)
         install_oslo_messaging_package(PROXY_PACKAGE_URL, PROXY_PACKAGE_NAME, computes)
+        apt_install_package(computes, "python-redis")
 
     if args.start_proxies:
         start_proxy_on_nodes(controllers)
