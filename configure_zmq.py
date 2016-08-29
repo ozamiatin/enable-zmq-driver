@@ -235,7 +235,12 @@ def detect_roles():
         computes = computes[:2]
 
 
-def firewall_ports_open(nodes, min_port, max_port):
+def firewall_ports_open(nodes, ports_list):
+    for node in nodes:
+        get_command_output("ssh %s 'iptables -A INPUT -p tcp --match multiport --dports %s -j ACCEPT'" % (node, ','.join(ports_list)))
+
+
+def firewall_port_range_open(nodes, min_port, max_port):
     for node in nodes:
         get_command_output("ssh %s 'iptables -A INPUT -p tcp --match multiport --dports %d:%d -j ACCEPT'" % (node, min_port, max_port))
 
@@ -248,8 +253,9 @@ def deploy_redis(node):
     print get_command_output("ssh %s 'apt-get install redis-server redis-tools'" % node)
     print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
     print get_command_output("ssh %(node)s '/tmp/hack_config_with_zmq.py hack_redis %(node)s" % {"node": node})
-    firewall_ports_open(controllers, 6379, 6379)
+    firewall_ports_open(controllers, [6379, 16379, 26379, 50001, 50002, 50003])
     elaborate_processes_on_nodes([node], ['redis-server'])
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dry-run', dest='dry_run', action='store_true')
@@ -363,8 +369,8 @@ def main():
         elaborate_processes_on_nodes(computes, COMPUTE_PROCS, 'restart')
 
     if args.firewall_open:
-        firewall_ports_open(controllers, 49152, 65535)
-        firewall_ports_open(computes, 49152, 65535)
+        firewall_port_range_open(controllers, 49152, 65535)
+        firewall_port_range_open(computes, 49152, 65535)
 
 if __name__ == "__main__":
     main()
