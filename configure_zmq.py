@@ -252,7 +252,7 @@ def restart_redis():
 def deploy_redis(node):
     print get_command_output("ssh %s 'apt-get install redis-server redis-tools'" % node)
     print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
-    print get_command_output("ssh %(node)s '/tmp/hack_config_with_zmq.py hack_redis %(node)s" % {"node": node})
+    print get_command_output("ssh %(node)s 'python /tmp/hack_config_with_zmq.py hack_redis %(node)s" % {"node": node})
     firewall_ports_open(controllers, [6379, 16379, 26379, 50001, 50002, 50003])
     elaborate_processes_on_nodes([node], ['redis-server'])
 
