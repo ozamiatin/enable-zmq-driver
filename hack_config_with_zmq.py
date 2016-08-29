@@ -42,6 +42,7 @@ def get_managable_ip_from_node(node):
 
 def hack_redis():
     file_name = '/etc/redis/redis.conf'
+    print "Rewriting redis config %s" % file_name
     with open(file_name, 'r') as fl:
         content = fl.readlines()
 
@@ -53,6 +54,7 @@ def hack_redis():
     for line in content:
         if line.startswith('bind 127.0.0.1'):
             line += ' ' + REDIS_HOST
+        print line + '\n'
         newcontent.append(line)
 
     with open(file_name, 'w') as fl:
