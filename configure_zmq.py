@@ -104,7 +104,8 @@ PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/p
 PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos9_all.deb"
 
 
-PATCH_SET = "refs/changes/79/352579/23"
+OSLO_MESSAGING_GIT_REPO = "https://git.openstack.org/openstack/oslo.messaging"
+OSLO_MESSAGING_GIT_BRANCH = "master"
 
 
 def elaborate_processes_on_nodes(nodes, processes, action='restart'):
@@ -185,10 +186,12 @@ def start_proxy_on_nodes_venv(nodes, debug=False):
 
             print get_command_output("ssh %s 'apt-get update && apt-get -y install git python-pip virtualenv python-dev'" % node)
             print get_command_output("ssh %(node)s 'rm -rf /tmp/venv /tmp/oslo.messaging "
-                                     "&& git clone https://git.openstack.org/openstack/oslo.messaging /tmp/oslo.messaging "
+                                     "&& git clone %(repo)s /tmp/oslo.messaging "
                                      "&& cd /tmp/oslo.messaging "
-                                     "&& git fetch https://git.openstack.org/openstack/oslo.messaging %(patch)s "
-                                     "&& git checkout FETCH_HEAD'" % {"node": node, "patch": PATCH_SET})
+                                     "&& git fetch %(repo)s %(patch)s "
+                                     "&& git checkout FETCH_HEAD'" % {"node": node,
+                                                                      "repo": OSLO_MESSAGING_GIT_REPO,
+                                                                      "patch": OSLO_MESSAGING_GIT_BRANCH})
             print get_command_output("ssh %s 'mkdir /tmp/venv && cd /tmp/venv && virtualenv --no-setuptools . && "
                                      ". /tmp/venv/bin/activate && "
                                      "pip install setuptools && "
@@ -294,6 +297,10 @@ parser.add_argument('--restart-redis', dest='restart_redis',
                     action='store_true')
 parser.add_argument('--redis-host', dest='redis_host', type=str)
 
+parser.add_argument('--git-repo', dest='git_repo', type=str)
+parser.add_argument('--git-branch', dest='git_branch', type=str)
+
+
 args = parser.parse_args()
 
 controllers = []
@@ -312,6 +319,14 @@ def main():
         REDIS_HOST = args.redis_host
     else:
         REDIS_HOST = controllers[0]
+
+    global OSLO_MESSAGING_GIT_REPO
+    if args.git_repo:
+        OSLO_MESSAGING_GIT_REPO = args.git_repo
+
+    global OSLO_MESSAGING_GIT_BRANCH
+    if args.git_repo:
+        OSLO_MESSAGING_GIT_BRANCH = args.git_repo
 
     print ("Detected controllers: %s" % controllers)
     print ("Detected computes: %s" % computes)
