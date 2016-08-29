@@ -6,7 +6,7 @@ import sys
 import subprocess
 
 
-REDIS_HOST = ''
+REDIS_HOST = sys.argv[2]
 
 RPC_BACKEND = re.compile('^\s*rpc_backend')
 DEFAULT = re.compile('^\s*\[DEFAULT\]\s*$')
@@ -60,10 +60,7 @@ def hack_redis():
     with open(file_name, 'w') as fl:
         fl.write(''.join(newcontent))
 
-
 def main():
-    global REDIS_HOST
-    REDIS_HOST = sys.argv[2]
 
     file_name = sys.argv[3]
     with open(file_name, 'r') as fl:
