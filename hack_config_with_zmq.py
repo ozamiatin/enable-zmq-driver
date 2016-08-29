@@ -53,13 +53,15 @@ def hack_redis():
     newcontent = []
     for line in content:
         if line.startswith('bind 127.0.0.1'):
-            replacement = line + ' ' + REDIS_HOST
+            replacement = 'bind 127.0.0.1 ' + REDIS_HOST
             print line + '->' + replacement + '\n'
-            line = replacement
-        newcontent.append(line)
+            newcontent.append(replacement)
+        else:
+            newcontent.append(line)
 
     with open(file_name, 'w') as fl:
         fl.write(''.join(newcontent))
+
 
 def main():
 
