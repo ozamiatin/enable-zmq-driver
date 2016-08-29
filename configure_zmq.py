@@ -4,6 +4,9 @@ import argparse
 from hack_config_with_zmq import get_command_output
 from hack_config_with_zmq import get_managable_ip_from_node
 
+REDIS_HOST = None
+
+
 CONTROLLER_PROCS = [
     'nova-api',
     'nova-cert',
@@ -145,13 +148,13 @@ def hack_configs_on_nodes(nodes, configs):
             print 'Editing %s' % conf_file
             if not args.dry_run:
                 print get_command_output("ssh %s 'rm /tmp/hack_config_with_zmq.pyc'" % node)
-                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py hack %s "
-                                         "> /tmp/hack_config_with_zmq.log 2>&1 < /tmp/hack_config_with_zmq.log  &'" % (node, conf_file))
+                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py hack %s %s "
+                                         "> /tmp/hack_config_with_zmq.log 2>&1 < /tmp/hack_config_with_zmq.log  &'" % (node, REDIS_HOST, conf_file))
 
 
 def generate_config_for_proxy(node):
     print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
-    print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate'" % node)
+    print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate %s'" % (node, REDIS_HOST))
 
 
 def start_proxy_on_nodes(nodes, debug=False):
@@ -241,6 +244,13 @@ def restart_redis():
     elaborate_processes_on_nodes(controllers, ['redis-server'])
 
 
+def deploy_redis(node):
+    print get_command_output("ssh %s 'apt-get install redis-server redis-tools'" % node)
+    print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
+    print get_command_output("ssh %(node)s '/tmp/hack_config_with_zmq.py hack_redis %(node)s" % {"node": node})
+    firewall_ports_open(controllers, 6379, 6379)
+    elaborate_processes_on_nodes([node], ['redis-server'])
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--dry-run', dest='dry_run', action='store_true')
 parser.add_argument('--install-packages', dest='install_packages',
@@ -271,10 +281,12 @@ parser.add_argument('--restart-computes', dest='restart_computes',
 parser.add_argument('--firewall-open', dest='firewall_open',
                     action='store_true')
 
+parser.add_argument('--deploy-redis', dest='deploy_redis', action='store_true')
 parser.add_argument('--deploy-redis-sentinel', dest='deploy_redis_sentinel',
                     action='store_true')
 parser.add_argument('--restart-redis', dest='restart_redis',
                     action='store_true')
+parser.add_argument('--redis-host', dest='redis_host', type=str)
 
 args = parser.parse_args()
 
@@ -289,8 +301,17 @@ def main():
 
     detect_roles()
 
+    global REDIS_HOST
+    if args.redis_host:
+        REDIS_HOST = args.redis_host
+    else:
+        REDIS_HOST = controllers[0]
+
     print ("Detected controllers: %s" % controllers)
     print ("Detected computes: %s" % computes)
+
+    if args.deploy_redis:
+        deploy_redis(REDIS_HOST)
 
     if args.install_pyredis:
         apt_install_package(computes, "python-redis")
@@ -331,7 +352,6 @@ def main():
         elaborate_resources(controllers[0], PCS_RESOURCES, 'start')
         elaborate_processes_on_nodes(controllers, CONTROLLER_PROCS, 'start')
         elaborate_processes_on_nodes(computes, COMPUTE_PROCS, 'start')
-
 
     if args.restart_resources:
         elaborate_resources(controllers[0], PCS_RESOURCES, 'restart')

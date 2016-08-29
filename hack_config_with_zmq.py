@@ -6,7 +6,7 @@ import sys
 import subprocess
 
 
-REDIS_HOST = "node-16"
+REDIS_HOST = ''
 
 RPC_BACKEND = re.compile('^\s*rpc_backend')
 DEFAULT = re.compile('^\s*\[DEFAULT\]\s*$')
@@ -40,8 +40,30 @@ def get_managable_ip_from_node(node):
     return get_command_output("ssh %s 'hostname'" % node)
 
 
+def hack_redis():
+    file_name = '/etc/redis/redis.conf'
+    with open(file_name, 'r') as fl:
+        content = fl.readlines()
+
+    if not os.path.isfile(file_name+".backup"):
+        with open(file_name+".backup", 'w') as fl:
+            fl.write(''.join(content))
+
+    newcontent = []
+    for line in content:
+        if line.startswith('bind 127.0.0.1'):
+            line += ' ' + REDIS_HOST
+        newcontent.append(line)
+
+    with open(file_name, 'w') as fl:
+        fl.write(''.join(newcontent))
+
+
 def main():
-    file_name = sys.argv[2]
+    global REDIS_HOST
+    REDIS_HOST = sys.argv[2]
+
+    file_name = sys.argv[3]
     with open(file_name, 'r') as fl:
         content = fl.readlines()
 
@@ -91,3 +113,5 @@ if __name__=="__main__":
         generate_proxy_conf()
     elif sys.argv[1] == "hack":
         main()
+    elif sys.argv[1] == "hack_redis":
+        hack_redis()
