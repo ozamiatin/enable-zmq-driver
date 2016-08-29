@@ -237,7 +237,7 @@ def detect_roles():
 
 def firewall_ports_open(nodes, ports_list):
     for node in nodes:
-        get_command_output("ssh %s 'iptables -A INPUT -p tcp --match multiport --dports %s -j ACCEPT'" % (node, ','.join(ports_list)))
+        get_command_output("ssh %s 'iptables -A INPUT -p tcp --match multiport --dports %s -j ACCEPT'" % (node, ','.join(str(port) for port in ports_list)))
 
 
 def firewall_port_range_open(nodes, min_port, max_port):
