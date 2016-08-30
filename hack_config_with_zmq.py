@@ -66,7 +66,7 @@ def hack_redis():
         fl.write(''.join(newcontent))
 
 
-def main():
+def hack_services():
 
     file_name = sys.argv[3]
     with open(file_name, 'r') as fl:
@@ -114,10 +114,13 @@ def main():
 
 
 if __name__=="__main__":
-    if sys.argv[1] == "generate":
-        use_pub_sub = True if sys.argv[3] == '--use-pub-sub' else False
-        generate_proxy_conf(use_pub_sub)
-    elif sys.argv[1] == "hack":
-        main()
-    elif sys.argv[1] == "hack_redis":
-        hack_redis()
+    try:
+        if sys.argv[1] == "generate":
+            use_pub_sub = True if sys.argv[3] == '--use-pub-sub' else False
+            generate_proxy_conf(use_pub_sub)
+        elif sys.argv[1] == "hack":
+            hack_services()
+        elif sys.argv[1] == "hack_redis":
+            hack_redis()
+    except RuntimeError as e:
+        print(str(e))
