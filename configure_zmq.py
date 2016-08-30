@@ -289,6 +289,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dry-run', dest='dry_run', action='store_true')
 parser.add_argument('--install-packages', dest='install_packages',
                     action='store_true')
+parser.add_argument('--update-public-keys', dest='update_public_keys', action='store_true')
 parser.add_argument('--start-proxies', dest='start_proxies',
                     action='store_true')
 parser.add_argument('--start-proxies-venv', dest='start_proxies_venv',
@@ -362,7 +363,8 @@ def main():
     print ("Detected controllers: %s" % controllers)
     print ("Detected computes: %s" % computes)
 
-    update_dpkg_keys()
+    if args.update_public_keys:
+        update_dpkg_keys()
 
     if args.generate_config:
         for node in controllers:
