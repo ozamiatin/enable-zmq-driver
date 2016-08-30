@@ -45,7 +45,7 @@ def start_proxy(debug):
     print get_command_output("nohup source /tmp/venv/bin/activate && nohup oslo-messaging-zmq-proxy %(debug)s "
                              "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
                              "--config-file=/etc/zmq-proxy/zmq.conf "
-                             "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &'" %
+                             "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &" %
                              {"debug": "--debug True" if debug else ""})
 
 
