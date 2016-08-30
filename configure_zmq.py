@@ -213,12 +213,14 @@ def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False):
                                      "pip install eventlet PyYAML oslo.messaging petname redis zmq && "
                                      "pip install /tmp/oslo.messaging'" % node)
 
-            print get_command_output("ssh %(node)s 'nohup source /tmp/venv/bin/activate && nohup oslo-messaging-zmq-proxy %(debug)s "
-                                     "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
-                                     "--config-file=/etc/zmq-proxy/zmq.conf "
-                                     "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &'" %
-                                     {"node": node,
-                                      "debug": "--debug True" if debug else ""})
+            print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py --start-proxy --redis-host %s'" % (node, REDIS_HOST))
+
+            # print get_command_output("ssh %(node)s 'nohup source /tmp/venv/bin/activate && nohup oslo-messaging-zmq-proxy %(debug)s "
+            #                          "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
+            #                          "--config-file=/etc/zmq-proxy/zmq.conf "
+            #                          "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &'" %
+            #                          {"node": node,
+            #                           "debug": "--debug True" if debug else ""})
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 

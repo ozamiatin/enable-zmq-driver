@@ -28,6 +28,7 @@ def get_command_output(cmd):
 
 
 def generate_proxy_conf(use_pub_sub):
+    get_command_output("rm -rf /etc/zmq-proxy/")
     get_command_output("mkdir /etc/zmq-proxy/")
     with open('/etc/zmq-proxy/zmq.conf', 'w+') as conf_f:
         conf_f.write("[oslo_messaging_zmq]\n"
@@ -37,6 +38,15 @@ def generate_proxy_conf(use_pub_sub):
                      "host=%s" % (get_command_output("hostname"),
                                   "true" if use_pub_sub else "false",
                                   REDIS_HOST))
+
+
+def start_proxy(debug):
+    get_command_output("rm -rf /var/log/zmq-proxy")
+    print get_command_output("source /tmp/venv/bin/activate && nohup oslo-messaging-zmq-proxy %(debug)s "
+                             "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
+                             "--config-file=/etc/zmq-proxy/zmq.conf "
+                             "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &'" %
+                             {"debug": "--debug True" if debug else ""})
 
 
 def get_managable_ip_from_node(node):
@@ -115,6 +125,8 @@ def hack_services():
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--generate', dest='generate', action='store_true')
+parser.add_argument('--start-proxy', dest='start_proxy', action='store_true')
+parser.add_argument('--debug', dest='debug', action='store_true')
 parser.add_argument('--hack', dest='hack', action='store_true')
 parser.add_argument('--hack_redis', dest='hack_redis', action='store_true')
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
@@ -135,5 +147,8 @@ if __name__=="__main__":
             hack_services()
         elif args.hack_redis:
             hack_redis()
+        elif args.start_proxy:
+            start_proxy(args.debug)
+
     except RuntimeError as e:
         print(str(e))
