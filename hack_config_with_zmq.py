@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
+import argparse
 import os
 import re
-import sys
 import subprocess
 
 
-REDIS_HOST = sys.argv[2]
+REDIS_HOST = ''
 
 RPC_BACKEND = re.compile('^\s*rpc_backend')
 DEFAULT = re.compile('^\s*\[DEFAULT\]\s*$')
@@ -68,7 +68,7 @@ def hack_redis():
 
 def hack_services():
 
-    file_name = sys.argv[3]
+    file_name = args.file_name
     with open(file_name, 'r') as fl:
         content = fl.readlines()
 
@@ -113,14 +113,27 @@ def hack_services():
         fl.write(''.join(newcontent))
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--generate', dest='generate', action='store_true')
+parser.add_argument('--hack', dest='hack', action='store_true')
+parser.add_argument('--hack_redis', dest='hack_redis', action='store_true')
+parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
+parser.add_argument('--file', dest='file_name', type=str)
+parser.add_argument('--redis-host', dest='redis_host', type=str)
+args = parser.parse_args()
+
+
 if __name__=="__main__":
     try:
-        if sys.argv[1] == "generate":
-            use_pub_sub = True if sys.argv[3] == '--use-pub-sub' else False
+        global REDIS_HOST
+        REDIS_HOST = args.redis_host
+
+        if args.generate:
+            use_pub_sub = True if args.use_pub_sub else False
             generate_proxy_conf(use_pub_sub)
-        elif sys.argv[1] == "hack":
+        elif args.hack:
             hack_services()
-        elif sys.argv[1] == "hack_redis":
+        elif args.hack_redis:
             hack_redis()
     except RuntimeError as e:
         print(str(e))

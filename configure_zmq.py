@@ -149,13 +149,13 @@ def hack_configs_on_nodes(nodes, configs):
             print 'Editing %s' % conf_file
             if not args.dry_run:
                 print get_command_output("ssh %s 'rm /tmp/hack_config_with_zmq.pyc'" % node)
-                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py hack %s %s "
+                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py --hack --redis-host %s --file %s "
                                          "> /tmp/hack_config_with_zmq.log 2>&1 < /tmp/hack_config_with_zmq.log  &'" % (node, REDIS_HOST, conf_file))
 
 
 def generate_config_for_proxy(node, use_pub_sub):
     print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
-    print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate %s %s'" % (node, REDIS_HOST, '--use-pub-sub' if use_pub_sub else ''))
+    print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate --redis-host %s %s'" % (node, REDIS_HOST, '--use-pub-sub' if use_pub_sub else ''))
 
 
 def start_proxy_on_nodes(nodes, use_pub_sub, debug=False):
@@ -255,7 +255,7 @@ def restart_redis():
 def deploy_redis(node):
     print get_command_output("ssh %s 'apt-get install redis-server redis-tools'" % node)
     print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
-    print get_command_output("ssh %(node)s 'python /tmp/hack_config_with_zmq.py hack_redis %(node)s'" % {"node": node})
+    print get_command_output("ssh %(node)s 'python /tmp/hack_config_with_zmq.py --hack_redis %(node)s'" % {"node": node})
     firewall_ports_open(controllers, [6379, 16379, 26379, 50001, 50002, 50003])
     elaborate_processes_on_nodes([node], ['redis-server'])
 
