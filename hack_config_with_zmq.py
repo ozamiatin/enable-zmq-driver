@@ -27,7 +27,7 @@ def get_command_output(cmd):
     return outp.strip()
 
 
-def generate_proxy_conf(use_pub_sub=True):
+def generate_proxy_conf(use_pub_sub):
     get_command_output("mkdir /etc/zmq-proxy/")
     with open('/etc/zmq-proxy/zmq.conf', 'w+') as conf_f:
         conf_f.write("[oslo_messaging_zmq]\n"
