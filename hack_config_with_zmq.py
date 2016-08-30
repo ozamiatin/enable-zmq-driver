@@ -124,8 +124,8 @@ args = parser.parse_args()
 
 
 if __name__=="__main__":
+    global REDIS_HOST
     try:
-        global REDIS_HOST
         REDIS_HOST = args.redis_host
 
         if args.generate:
