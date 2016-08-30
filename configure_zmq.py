@@ -153,17 +153,17 @@ def hack_configs_on_nodes(nodes, configs):
                                          "> /tmp/hack_config_with_zmq.log 2>&1 < /tmp/hack_config_with_zmq.log  &'" % (node, REDIS_HOST, conf_file))
 
 
-def generate_config_for_proxy(node):
+def generate_config_for_proxy(node, use_pub_sub):
     print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
-    print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate %s'" % (node, REDIS_HOST))
+    print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate %s %s'" % (node, REDIS_HOST, '--use-pub-sub' if use_pub_sub else ''))
 
 
-def start_proxy_on_nodes(nodes, debug=False):
+def start_proxy_on_nodes(nodes, use_pub_sub, debug=False):
 
     for node in nodes:
         print get_managable_ip_from_node(node)
         if not args.dry_run:
-            generate_config_for_proxy(node)
+            generate_config_for_proxy(node, use_pub_sub)
 
             print get_command_output("ssh %(node)s 'nohup oslo-messaging-zmq-proxy %(debug)s "
                                      "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
@@ -175,12 +175,12 @@ def start_proxy_on_nodes(nodes, debug=False):
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
 
-def start_proxy_on_nodes_venv(nodes, debug=False):
+def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False):
 
     for node in nodes:
         print get_managable_ip_from_node(node)
         if not args.dry_run:
-            generate_config_for_proxy(node)
+            generate_config_for_proxy(node, use_pub_sub)
 
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
@@ -300,6 +300,9 @@ parser.add_argument('--redis-host', dest='redis_host', type=str)
 parser.add_argument('--git-repo', dest='git_repo', type=str)
 parser.add_argument('--git-branch', dest='git_branch', type=str)
 
+parser.add_argument('--generate-config', dest='generate_config', action='store_true')
+parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
+parser.add_argument('--debug', dest='debug', action='store_true')
 
 args = parser.parse_args()
 
@@ -328,8 +331,15 @@ def main():
     if args.git_branch:
         OSLO_MESSAGING_GIT_BRANCH = args.git_branch
 
+    use_pub_sub = args.use_pub_sub if args.use_pub_sub else True
+    use_debug_logging = args.debug if args.debug else False
+
     print ("Detected controllers: %s" % controllers)
     print ("Detected computes: %s" % computes)
+
+    if args.generate_config:
+        for node in controllers:
+            generate_config_for_proxy(node, use_pub_sub=use_pub_sub)
 
     if args.deploy_redis:
         deploy_redis(REDIS_HOST)
@@ -349,10 +359,10 @@ def main():
         apt_install_package(computes, "python-redis")
 
     if args.start_proxies:
-        start_proxy_on_nodes(controllers)
+        start_proxy_on_nodes(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging)
 
     if args.start_proxies_venv:
-        start_proxy_on_nodes_venv(controllers)
+        start_proxy_on_nodes_venv(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging)
 
     if args.restart_redis:
         restart_redis()

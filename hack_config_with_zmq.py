@@ -27,13 +27,16 @@ def get_command_output(cmd):
     return outp.strip()
 
 
-def generate_proxy_conf():
+def generate_proxy_conf(use_pub_sub=True):
     get_command_output("mkdir /etc/zmq-proxy/")
     with open('/etc/zmq-proxy/zmq.conf', 'w+') as conf_f:
         conf_f.write("[oslo_messaging_zmq]\n"
                      "rpc_zmq_host=%s\n"
+                     "use_pub_sub=%s\n"
                      "[matchmaker_redis]\n"
-                     "host=%s" % (get_command_output("hostname"), REDIS_HOST))
+                     "host=%s" % (get_command_output("hostname"),
+                                  "true" if use_pub_sub else "false",
+                                  REDIS_HOST))
 
 
 def get_managable_ip_from_node(node):
@@ -112,7 +115,8 @@ def main():
 
 if __name__=="__main__":
     if sys.argv[1] == "generate":
-        generate_proxy_conf()
+        use_pub_sub = True if sys.argv[2] == '--use-pub-sub' else False
+        generate_proxy_conf(use_pub_sub)
     elif sys.argv[1] == "hack":
         main()
     elif sys.argv[1] == "hack_redis":
