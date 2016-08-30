@@ -356,7 +356,7 @@ def main():
     if args.git_branch:
         OSLO_MESSAGING_GIT_BRANCH = args.git_branch
 
-    use_pub_sub = args.use_pub_sub if args.use_pub_sub else True
+    use_pub_sub = args.use_pub_sub if args.use_pub_sub else False
     use_debug_logging = args.debug if args.debug else False
 
     print ("Detected controllers: %s" % controllers)
