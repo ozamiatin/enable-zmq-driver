@@ -42,7 +42,7 @@ def generate_proxy_conf(use_pub_sub):
 
 def start_proxy(debug):
     print get_command_output("rm -rf /var/log/zmq-proxy.log")
-    print get_command_output("nohup /tmp/venv/bin/activate && oslo-messaging-zmq-proxy %(debug)s "
+    print get_command_output("nohup /tmp/venv/bin/python /tmp/oslo.messaging/oslo_messaging/_cmd/zmq_proxy.py %(debug)s "
                              "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
                              "--config-file=/etc/zmq-proxy/zmq.conf "
                              "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &" %
