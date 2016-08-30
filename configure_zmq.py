@@ -260,6 +260,16 @@ def deploy_redis(node):
     elaborate_processes_on_nodes([node], ['redis-server'])
 
 
+def update_dpkg_keys():
+    def update_node(node):
+        print get_command_output("ssh %s 'dpkg --configure -a'" % node)
+
+    for node in controllers:
+        update_node(node)
+    for node in computes:
+        update_node(node)
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--dry-run', dest='dry_run', action='store_true')
 parser.add_argument('--install-packages', dest='install_packages',
@@ -336,6 +346,8 @@ def main():
 
     print ("Detected controllers: %s" % controllers)
     print ("Detected computes: %s" % computes)
+
+    update_dpkg_keys()
 
     if args.generate_config:
         for node in controllers:
