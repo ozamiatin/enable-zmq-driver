@@ -1,8 +1,23 @@
 #!/usr/bin/python
 
 import argparse
-from hack_config_with_zmq import get_command_output
-from hack_config_with_zmq import get_managable_ip_from_node
+import subprocess
+
+
+def get_command_output(cmd):
+    print 'Executing cmd: %s' % cmd
+    pp = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    outp, err = pp.communicate()
+
+    if pp.returncode != 0:
+        print ('RuntimeError: Process returned non-zero code %i' % pp.returncode)
+
+    return outp.strip()
+
+
+def get_managable_ip_from_node(node):
+    return get_command_output("ssh %s 'hostname'" % node)
+
 
 REDIS_HOST = None
 
