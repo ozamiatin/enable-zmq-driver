@@ -115,7 +115,7 @@ def main():
 
 if __name__=="__main__":
     if sys.argv[1] == "generate":
-        use_pub_sub = True if sys.argv[2] == '--use-pub-sub' else False
+        use_pub_sub = True if sys.argv[3] == '--use-pub-sub' else False
         generate_proxy_conf(use_pub_sub)
     elif sys.argv[1] == "hack":
         main()
