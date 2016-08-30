@@ -208,12 +208,12 @@ def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False):
                                                                       "repo": OSLO_MESSAGING_GIT_REPO,
                                                                       "patch": OSLO_MESSAGING_GIT_BRANCH})
             print get_command_output("ssh %s 'mkdir /tmp/venv && cd /tmp/venv && virtualenv --no-setuptools . && "
-                                     ". /tmp/venv/bin/activate && "
+                                     "source /tmp/venv/bin/activate && "
                                      "pip install setuptools && "
                                      "pip install eventlet PyYAML oslo.messaging petname redis zmq && "
                                      "pip install /tmp/oslo.messaging'" % node)
 
-            print get_command_output("ssh %(node)s 'nohup /tmp/venv/bin/activate && oslo-messaging-zmq-proxy %(debug)s "
+            print get_command_output("ssh %(node)s 'nohup source /tmp/venv/bin/activate && nohup oslo-messaging-zmq-proxy %(debug)s "
                                      "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
                                      "--config-file=/etc/zmq-proxy/zmq.conf "
                                      "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &'" %
