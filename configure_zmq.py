@@ -155,7 +155,7 @@ def hack_configs_on_nodes(nodes, configs):
 
 def generate_config_for_proxy(node, use_pub_sub):
     print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
-    print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py generate --redis-host %s %s'" % (node, REDIS_HOST, '--use-pub-sub' if use_pub_sub else ''))
+    print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py --generate --redis-host %s %s'" % (node, REDIS_HOST, '--use-pub-sub' if use_pub_sub else ''))
 
 
 def start_proxy_on_nodes(nodes, use_pub_sub, debug=False):
