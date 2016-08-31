@@ -285,7 +285,7 @@ def restart_redis():
 def deploy_redis(node):
     update_dpkg_keys()
     print get_command_output("ssh %s 'apt-get install redis-server redis-tools'" % node)
-    exec_remote_configurer(node, command="--deploy-redis", redis_host=REDIS_HOST)
+    exec_remote_configurer(node, command="--hack-redis", redis_host=REDIS_HOST)
     firewall_ports_open(controllers, [6379, 16379, 26379, 50001, 50002, 50003])
     elaborate_processes_on_nodes([node], ['redis-server'])
 
