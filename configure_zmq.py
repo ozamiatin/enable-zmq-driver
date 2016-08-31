@@ -211,7 +211,6 @@ def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False, double_proxy=Fals
     for node in nodes:
         print get_managable_ip_from_node(node)
         if not args.dry_run:
-            generate_config_for_proxy(node, use_pub_sub)
 
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
@@ -230,7 +229,7 @@ def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False, double_proxy=Fals
                                      "pip install /tmp/oslo.messaging'" % node)
 
             exec_remote_configurer(node, command="--start-proxy", redis_host=REDIS_HOST,
-                                   debug=debug, double_proxy=double_proxy)
+                                   debug=debug, double_proxy=double_proxy, use_pub_sub=use_pub_sub)
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
