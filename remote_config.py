@@ -159,7 +159,7 @@ if __name__ == "__main__":
             hack_services(args.debug)
         elif args.hack_redis:
             hack_redis()
-        elif args.kill_proxy():
+        elif args.kill_proxy:
             kill_proxy()
         elif args.start_proxy:
             start_proxy(args.debug)
