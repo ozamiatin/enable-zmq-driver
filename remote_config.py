@@ -41,13 +41,15 @@ def generate_proxy_conf(use_pub_sub):
                                   REDIS_HOST))
 
 
-def start_proxy(debug):
+def start_proxy(debug, use_pub_sub, double_router):
+    generate_proxy_conf(use_pub_sub)
     print get_command_output("rm -rf /var/log/zmq-proxy.log")
     print get_command_output("nohup /tmp/venv/bin/python /tmp/oslo.messaging/oslo_messaging/_cmd/zmq_proxy.py %(debug)s "
-                             "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
+                             "--frontend-port 50001 %(backend_port)s --publisher-port 50003 "
                              "--config-file=/etc/zmq-proxy/zmq.conf "
                              "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &" %
-                             {"debug": "--debug True" if debug else ""})
+                             {"debug": "--debug True" if debug else "",
+                              "backend_port": "--backend-port 50002" if double_router else ""})
 
 
 def kill_proxy():
@@ -137,6 +139,7 @@ def hack_services(debug):
 parser = argparse.ArgumentParser()
 parser.add_argument('--generate', dest='generate', action='store_true')
 parser.add_argument('--start-proxy', dest='start_proxy', action='store_true')
+parser.add_argument('--double-proxy', dest='double_proxy', action='store_true')
 parser.add_argument('--kill-proxy', dest='kill_proxy', action='store_true')
 parser.add_argument('--debug', dest='debug', action='store_true')
 parser.add_argument('--hack', dest='hack', action='store_true')
@@ -162,7 +165,7 @@ if __name__ == "__main__":
         elif args.kill_proxy:
             kill_proxy()
         elif args.start_proxy:
-            start_proxy(args.debug)
+            start_proxy(args.debug, args.use_pub_sub, args.double_proxy)
 
     except RuntimeError as e:
         print(str(e))

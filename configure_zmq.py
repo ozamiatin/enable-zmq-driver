@@ -163,13 +163,14 @@ def exec_remote_configurer(node, command="", **kwargs):
     paste_remote_configurer(node)
     file_name = kwargs.get("file")
     print get_command_output("ssh %(node)s 'python /tmp/remote_config.py %(cmd)s "
-                             "--redis-host %(redis_host)s%(file)s%(use_pub_sub)s%(debug)s'" %
+                             "--redis-host %(redis_host)s%(file)s%(use_pub_sub)s%(debug)s%(double_proxy)s'" %
                              {"node": node,
                               "cmd": command,
                               "redis_host": kwargs.pop("redis_host", REDIS_HOST),
                               "file": " --file %s" % file_name if file_name else "",
                               "use_pub_sub": " --use-pub-sub" if kwargs.pop("use_pub_sub", False) else "",
-                              "debug": " --debug" if kwargs.pop("debug", False) else ""})
+                              "debug": " --debug" if kwargs.pop("debug", False) else "",
+                              "double_proxy": "--double-proxy" if kwargs.pop("double_proxy", False) else ""})
 
 
 def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, debug=False):
@@ -187,7 +188,7 @@ def generate_config_for_proxy(node, use_pub_sub):
     exec_remote_configurer(node, command="--generate", redis_host=REDIS_HOST, use_pub_sub=use_pub_sub)
 
 
-def start_proxy_on_nodes(nodes, use_pub_sub, debug=False):
+def start_proxy_on_nodes(nodes, use_pub_sub, debug=False, double_proxy=False):
 
     for node in nodes:
         print get_managable_ip_from_node(node)
@@ -195,16 +196,17 @@ def start_proxy_on_nodes(nodes, use_pub_sub, debug=False):
             generate_config_for_proxy(node, use_pub_sub)
 
             print get_command_output("ssh %(node)s 'nohup oslo-messaging-zmq-proxy %(debug)s "
-                                     "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
+                                     "--frontend-port 50001 %(backend_port)s --publisher-port 50003 "
                                      "--config-file=/etc/zmq-proxy/zmq.conf "
                                      "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" %
                                      {"node": node,
-                                      "debug": "--debug True" if debug else ""})
+                                      "debug": "--debug True" if debug else "",
+                                      "backend_port": "--backend-port 50002" if double_proxy else ""})
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
 
-def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False):
+def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False, double_proxy=False):
 
     for node in nodes:
         print get_managable_ip_from_node(node)
@@ -227,7 +229,8 @@ def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False):
                                      "pip install eventlet PyYAML oslo.messaging petname redis zmq && "
                                      "pip install /tmp/oslo.messaging'" % node)
 
-            exec_remote_configurer(node, command="--start-proxy", redis_host=REDIS_HOST, debug=debug)
+            exec_remote_configurer(node, command="--start-proxy", redis_host=REDIS_HOST,
+                                   debug=debug, double_proxy=double_proxy)
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
@@ -308,6 +311,8 @@ parser.add_argument('--update-public-keys', dest='update_public_keys', action='s
 parser.add_argument('--start-proxies', dest='start_proxies',
                     action='store_true')
 parser.add_argument('--start-proxies-venv', dest='start_proxies_venv',
+                    action='store_true')
+parser.add_argument('--double-proxy', dest='double_proxy',
                     action='store_true')
 parser.add_argument('--kill-proxies', dest='kill_proxies',
                     action='store_true')
