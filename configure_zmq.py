@@ -409,10 +409,10 @@ def main():
         apt_install_package(computes, "python-redis")
 
     if args.start_proxies:
-        start_proxy_on_nodes(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging)
+        start_proxy_on_nodes(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging, double_proxy=args.double_proxy)
 
     if args.start_proxies_venv:
-        start_proxy_on_nodes_venv(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging)
+        start_proxy_on_nodes_venv(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging, double_proxy=args.double_proxy)
 
     if args.kill_proxies:
         stop_proxies_on_nodes(controllers)
