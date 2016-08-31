@@ -16,6 +16,7 @@ ZMQ_SECTION = re.compile('^\s*\[oslo_messaging_zmq\]\s*$')
 IGNORE=['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host',
         'default_log_levels', 'sentinel_hosts']
 
+
 def get_command_output(cmd):
     print 'Executing cmd: %s' % cmd
     pp = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -49,6 +50,12 @@ def start_proxy(debug):
                              {"debug": "--debug True" if debug else ""})
 
 
+def kill_proxy():
+    p_ids = get_command_output("ps aux | grep zm[q] | awk '{ print $2 }'").split('\n')
+    for pid in p_ids:
+        get_command_output("kill -9 %s" % pid)
+
+
 def get_managable_ip_from_node(node):
     return get_command_output("ssh %s 'hostname'" % node)
 
@@ -76,7 +83,7 @@ def hack_redis():
         fl.write(''.join(newcontent))
 
 
-def hack_services():
+def hack_services(debug):
 
     file_name = args.file_name
     with open(file_name, 'r') as fl:
@@ -100,8 +107,12 @@ def hack_services():
         if time_to_put_config:
             time_to_put_config = False
 
-            # newcontent.append('debug = True\n')
-            newcontent.append('default_log_levels=amqp=WARN,amqplib=WARN,boto=WARN,iso8601=WARN,keystonemiddleware=WARN,oslo.messaging=WARN,oslo_messaging=WARN,qpid=WARN,requests.packages.urllib3.connectionpool=WARN,requests.packages.urllib3.util.retry=WARN,routes.middleware=WARN,sqlalchemy=WARN,stevedore=WARN,suds=INFO,taskflow=WARN,urllib3.connectionpool=WARN,urllib3.util.retry=WARN,websocket=WARN\n')
+            if debug:
+                newcontent.append('debug = True\n')
+
+            newcontent.append('default_log_levels=amqp=WARN,amqplib=WARN,boto=WARN,iso8601=WARN,keystonemiddleware=WARN,oslo.messaging=%(debug)s,oslo_messaging=%(debug)s,qpid=WARN,requests.packages.urllib3.connectionpool=WARN,requests.packages.urllib3.util.retry=WARN,routes.middleware=WARN,sqlalchemy=WARN,stevedore=WARN,suds=INFO,taskflow=WARN,urllib3.connectionpool=WARN,urllib3.util.retry=WARN,websocket=WARN\n' %
+                              {"debug": "DEBUG" if debug else "WARN"})
+
             newcontent.append('rpc_backend = zmq\n')
 
         if RPC_BACKEND.match(line) or REDIS_SECTION.match(line) or ZMQ_SECTION.match(line):
@@ -126,6 +137,7 @@ def hack_services():
 parser = argparse.ArgumentParser()
 parser.add_argument('--generate', dest='generate', action='store_true')
 parser.add_argument('--start-proxy', dest='start_proxy', action='store_true')
+parser.add_argument('--kill-proxy', dest='kill_proxy', action='store_true')
 parser.add_argument('--debug', dest='debug', action='store_true')
 parser.add_argument('--hack', dest='hack', action='store_true')
 parser.add_argument('--hack_redis', dest='hack_redis', action='store_true')
@@ -135,7 +147,7 @@ parser.add_argument('--redis-host', dest='redis_host', type=str)
 args = parser.parse_args()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     global REDIS_HOST
     try:
         REDIS_HOST = args.redis_host
@@ -144,9 +156,11 @@ if __name__=="__main__":
             use_pub_sub = True if args.use_pub_sub else False
             generate_proxy_conf(use_pub_sub)
         elif args.hack:
-            hack_services()
+            hack_services(args.debug)
         elif args.hack_redis:
             hack_redis()
+        elif args.kill_proxy():
+            kill_proxy()
         elif args.start_proxy:
             start_proxy(args.debug)
 

@@ -36,7 +36,7 @@ CONTROLLER_PROCS = [
     # 'neutron-metadata-agent',
     # 'neutron-ns-metadata-proxy',
     # 'neutron-openvswitch-agent',
-     'neutron-server',
+    'neutron-server',
 
     'cinder-api',
     'cinder-backup',
@@ -155,22 +155,25 @@ def clear_logs_on_nodes(nodes, logs):
                 print get_command_output("ssh %s 'rm %s'" % (node, log_pattern))
 
 
+def paste_remote_configurer(node):
+    print get_command_output('scp remote_config.py %s:/tmp' % node)
+
+
 def hack_configs_on_nodes(nodes, configs):
     for node in nodes:
         print '\nHacking configs on %s' % node
-        print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
 
         for conf_file in configs:
             print 'Editing %s' % conf_file
             if not args.dry_run:
                 print get_command_output("ssh %s 'rm /tmp/hack_config_with_zmq.pyc'" % node)
-                print get_command_output("ssh %s '/tmp/hack_config_with_zmq.py --hack --redis-host %s --file %s "
+                print get_command_output("ssh %s '/tmp/remote_config.py --hack --redis-host %s --file %s "
                                          "> /tmp/hack_config_with_zmq.log 2>&1 < /tmp/hack_config_with_zmq.log  &'" % (node, REDIS_HOST, conf_file))
 
 
 def generate_config_for_proxy(node, use_pub_sub):
-    print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
-    print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py --generate --redis-host %s %s'" % (node, REDIS_HOST, '--use-pub-sub' if use_pub_sub else ''))
+    paste_remote_configurer(node)
+    print get_command_output("ssh %s 'python /tmp/remote_config.py --generate --redis-host %s %s'" % (node, REDIS_HOST, '--use-pub-sub' if use_pub_sub else ''))
 
 
 def start_proxy_on_nodes(nodes, use_pub_sub, debug=False):
@@ -213,16 +216,15 @@ def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False):
                                      "pip install eventlet PyYAML oslo.messaging petname redis zmq && "
                                      "pip install /tmp/oslo.messaging'" % node)
 
-            print get_command_output("ssh %s 'python /tmp/hack_config_with_zmq.py --start-proxy --redis-host %s'" % (node, REDIS_HOST))
-
-            # print get_command_output("ssh %(node)s 'nohup source /tmp/venv/bin/activate && nohup oslo-messaging-zmq-proxy %(debug)s "
-            #                          "--frontend-port 50001 --backend-port 50002 --publisher-port 50003 "
-            #                          "--config-file=/etc/zmq-proxy/zmq.conf "
-            #                          "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &'" %
-            #                          {"node": node,
-            #                           "debug": "--debug True" if debug else ""})
+            print get_command_output("ssh %s 'python /tmp/remote_config.py --start-proxy --redis-host %s %s'" % (node, REDIS_HOST, "--debug" if debug else ""))
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
+
+
+def stop_proxies_on_nodes(nodes):
+    for node in nodes:
+        paste_remote_configurer(node)
+        print get_command_output("ssh %s 'python /tmp/remote_config.py --kill-proxy --redis-host %s'" % (node, REDIS_HOST))
 
 
 def install_oslo_messaging_package(package_url, package_name, nodes):
@@ -272,8 +274,8 @@ def restart_redis():
 def deploy_redis(node):
     update_dpkg_keys()
     print get_command_output("ssh %s 'apt-get install redis-server redis-tools'" % node)
-    print get_command_output('scp hack_config_with_zmq.py %s:/tmp' % node)
-    print get_command_output("ssh %(node)s 'python /tmp/hack_config_with_zmq.py --hack_redis %(node)s'" % {"node": node})
+    print get_command_output('scp remote_config.py %s:/tmp' % node)
+    print get_command_output("ssh %(node)s 'python /tmp/remote_config.py --hack_redis %(node)s'" % {"node": node})
     firewall_ports_open(controllers, [6379, 16379, 26379, 50001, 50002, 50003])
     elaborate_processes_on_nodes([node], ['redis-server'])
 
@@ -296,6 +298,8 @@ parser.add_argument('--update-public-keys', dest='update_public_keys', action='s
 parser.add_argument('--start-proxies', dest='start_proxies',
                     action='store_true')
 parser.add_argument('--start-proxies-venv', dest='start_proxies_venv',
+                    action='store_true')
+parser.add_argument('--kill-proxies', dest='kill_proxies',
                     action='store_true')
 parser.add_argument('--restart-services', dest='restart_services',
                     action='store_true')
@@ -395,6 +399,9 @@ def main():
 
     if args.start_proxies_venv:
         start_proxy_on_nodes_venv(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging)
+
+    if args.kill_proxies:
+        stop_proxies_on_nodes(controllers)
 
     if args.restart_redis:
         restart_redis()
