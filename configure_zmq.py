@@ -170,7 +170,7 @@ def exec_remote_configurer(node, command="", **kwargs):
                               "file": " --file %s" % file_name if file_name else "",
                               "use_pub_sub": " --use-pub-sub" if kwargs.pop("use_pub_sub", False) else "",
                               "debug": " --debug" if kwargs.pop("debug", False) else "",
-                              "double_proxy": "--double-proxy" if kwargs.pop("double_proxy", False) else ""})
+                              "double_proxy": " --double-proxy" if kwargs.pop("double_proxy", False) else ""})
 
 
 def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, debug=False):
