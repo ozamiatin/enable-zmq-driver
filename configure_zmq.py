@@ -163,12 +163,12 @@ def exec_remote_configurer(node, command="", **kwargs):
     paste_remote_configurer(node)
     file_name = kwargs.get("file")
     print get_command_output("ssh %(node)s 'python /tmp/remote_config.py %(cmd)s "
-                             "--redis-host %(redis_host)s %(file)s %(use_pub_sub)s %(debug)s" %
+                             "--redis-host %(redis_host)s %(file)s %(use_pub_sub)s %(debug)s'" %
                              {"node": node,
                               "cmd": command,
                               "redis_host": kwargs.pop("redis_host", REDIS_HOST),
                               "file": "--file %s" % file_name if file_name else "",
-                              "use_pub_sub": "--use-pub-sub" if kwargs.pop("use_pub_sub", True) else "",
+                              "use_pub_sub": "--use-pub-sub" if kwargs.pop("use_pub_sub", False) else "",
                               "debug": "--debug" if kwargs.pop("debug", False) else ""})
 
 
