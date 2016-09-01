@@ -55,7 +55,7 @@ def start_proxy(debug, use_pub_sub, double_router):
 def kill_proxy():
     p_ids = get_command_output("ps aux | grep zm[q] | awk '{ print $2 }'").split('\n')
     for pid in p_ids:
-        get_command_output("kill -2 %s" % pid)
+        get_command_output("kill -9 %s" % pid)
 
 
 def get_managable_ip_from_node(node):
