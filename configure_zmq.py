@@ -310,17 +310,14 @@ def build_cpp_proxy(node):
                              "&& git clone %(repo)s %(proxy_dir)s "
                              "&& cd %(proxy_dir)s "
                              "&& git fetch %(repo)s %(patch)s "
-                             "&& git checkout FETCH_HEAD' " %
+                             "&& git checkout FETCH_HEAD "
+                             "&& /bin/bash %(proxy_dir)s/install_deps_ubuntu.sh "
+                             "&& /bin/bash %(proxy_dir)s/build "
+                             "&& /bin/bash %(proxy_dir)s/build_release'" %
                              {"node": node,
                               "proxy_dir": proxy_dir,
                               "repo": OSLO_MESSAGING_GIT_REPO,
                               "patch": OSLO_MESSAGING_GIT_BRANCH})
-
-    print get_command_output("ssh %(node)s '"
-                             "/bin/bash %(proxy_dir)s/install_deps_ubuntu.sh "
-                             "&& /bin/bash %(proxy_dir)s/build "
-                             "&& /bin/bash %(proxy_dir)s/build_release'" %
-                             {"node": node, "proxy_dir": proxy_dir})
 
 
 parser = argparse.ArgumentParser()
