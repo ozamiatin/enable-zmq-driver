@@ -311,7 +311,7 @@ def build_cpp_proxy(node):
                              "&& cd %(proxy_dir)s "
                              "&& git fetch %(repo)s %(patch)s "
                              "&& git checkout FETCH_HEAD' "
-                             "&& ./install_deps_ubuntu "
+                             "&& ./install_deps_ubuntu.sh "
                              "&& ./build "
                              "&& ./build_release " %
                              {"node": node,
