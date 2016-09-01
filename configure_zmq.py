@@ -304,6 +304,22 @@ def update_dpkg_keys():
         update_node(node)
 
 
+def build_cpp_proxy(node):
+    proxy_dir = "/tmp/zeromq-cpp-proxy"
+    print get_command_output("ssh %(node)s 'rm -rf %(proxy_dir)s "
+                             "&& git clone %(repo)s %(proxy_dir)s "
+                             "&& cd %(proxy_dir)s "
+                             "&& git fetch %(repo)s %(patch)s "
+                             "&& git checkout FETCH_HEAD' "
+                             "&& ./install_deps_ubuntu "
+                             "&& ./build "
+                             "&& ./build_release " %
+                             {"node": node,
+                              "proxy_dir": proxy_dir,
+                              "repo": OSLO_MESSAGING_GIT_REPO,
+                              "patch": OSLO_MESSAGING_GIT_BRANCH})
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--dry-run', dest='dry_run', action='store_true')
 parser.add_argument('--install-packages', dest='install_packages',
@@ -353,6 +369,8 @@ parser.add_argument('--generate-config', dest='generate_config', action='store_t
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
 parser.add_argument('--debug', dest='debug', action='store_true')
 
+parser.add_argument('--build-cpp-proxy', dest='build_cpp_proxy', action='store_true')
+
 args = parser.parse_args()
 
 controllers = []
@@ -385,6 +403,10 @@ def main():
 
     print ("Detected controllers: %s" % controllers)
     print ("Detected computes: %s" % computes)
+
+    if args.build_cpp_proxy:
+        for node in controllers:
+            build_cpp_proxy(node)
 
     if args.update_public_keys:
         update_dpkg_keys()
