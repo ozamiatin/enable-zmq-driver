@@ -38,7 +38,7 @@ def generate_proxy_conf(use_pub_sub):
                      "[matchmaker_redis]\n"
                      "host=%s" % (get_command_output("hostname"),
                                   "true" if use_pub_sub else "false",
-                                  REDIS_HOST))
+                                  get_managable_ip_from_node(REDIS_HOST)))
 
 
 def start_proxy(debug, use_pub_sub, double_router):
