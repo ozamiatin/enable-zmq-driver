@@ -59,7 +59,7 @@ def kill_proxy():
 
 
 def get_managable_ip_from_node(node):
-    return get_command_output("ssh %s 'hostname'" % node)
+    return get_command_output("host %s" % node).split(' ')[-1]
 
 
 def hack_redis():
