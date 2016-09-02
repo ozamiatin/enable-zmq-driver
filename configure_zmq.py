@@ -322,6 +322,9 @@ def build_cpp_proxy(node):
 
 def start_cpp_proxy_on_nodes(nodes, use_pub_sub, debug=False, double_proxy=True):
 
+    # Force double proxy for now
+    double_proxy = True
+
     for node in nodes:
         print get_managable_ip_from_node(node)
         if not args.dry_run:
