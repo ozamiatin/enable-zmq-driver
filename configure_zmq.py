@@ -22,6 +22,7 @@ def get_managable_ip_from_node(node):
 
 REDIS_HOST = None
 CPP_PROXY_DIR = "/tmp/zeromq-cpp-proxy"
+VENV_DIR = "/tmp/venv"
 
 
 CONTROLLER_PROCS = [
@@ -208,6 +209,23 @@ def start_proxy_on_nodes(nodes, use_pub_sub, debug=False, double_proxy=False):
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
 
+def setup_venv(nodes):
+    for node in nodes:
+        print get_command_output("ssh %s 'apt-get update && apt-get -y install git python-pip virtualenv python-dev'" % node)
+        print get_command_output("ssh %(node)s 'rm -rf /tmp/venv /tmp/oslo.messaging "
+                                 "&& git clone %(repo)s /tmp/oslo.messaging "
+                                 "&& cd /tmp/oslo.messaging "
+                                 "&& git fetch %(repo)s %(patch)s "
+                                 "&& git checkout FETCH_HEAD'" % {"node": node,
+                                                                  "repo": OSLO_MESSAGING_GIT_REPO,
+                                                                  "patch": OSLO_MESSAGING_GIT_BRANCH})
+        print get_command_output("ssh %s 'mkdir /tmp/venv && cd /tmp/venv && virtualenv --no-setuptools . && "
+                                 "source /tmp/venv/bin/activate && "
+                                 "pip install setuptools && "
+                                 "pip install eventlet PyYAML oslo.messaging petname redis zmq && "
+                                 "pip install /tmp/oslo.messaging'" % node)
+
+
 def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False, double_proxy=False):
 
     for node in nodes:
@@ -215,20 +233,6 @@ def start_proxy_on_nodes_venv(nodes, use_pub_sub, debug=False, double_proxy=Fals
         if not args.dry_run:
 
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
-
-            print get_command_output("ssh %s 'apt-get update && apt-get -y install git python-pip virtualenv python-dev'" % node)
-            print get_command_output("ssh %(node)s 'rm -rf /tmp/venv /tmp/oslo.messaging "
-                                     "&& git clone %(repo)s /tmp/oslo.messaging "
-                                     "&& cd /tmp/oslo.messaging "
-                                     "&& git fetch %(repo)s %(patch)s "
-                                     "&& git checkout FETCH_HEAD'" % {"node": node,
-                                                                      "repo": OSLO_MESSAGING_GIT_REPO,
-                                                                      "patch": OSLO_MESSAGING_GIT_BRANCH})
-            print get_command_output("ssh %s 'mkdir /tmp/venv && cd /tmp/venv && virtualenv --no-setuptools . && "
-                                     "source /tmp/venv/bin/activate && "
-                                     "pip install setuptools && "
-                                     "pip install eventlet PyYAML oslo.messaging petname redis zmq && "
-                                     "pip install /tmp/oslo.messaging'" % node)
 
             exec_remote_configurer(node, command="--start-proxy", redis_host=REDIS_HOST,
                                    debug=debug, double_proxy=double_proxy, use_pub_sub=use_pub_sub)
@@ -355,6 +359,8 @@ parser.add_argument('--start-proxies', dest='start_proxies',
                     action='store_true')
 parser.add_argument('--start-proxies-venv', dest='start_proxies_venv',
                     action='store_true')
+parser.add_argument('--setup-venv', dest='setup_venv', action='store_true')
+
 parser.add_argument('--start-proxies-cpp', dest='start_proxies_cpp',
                     action='store_true')
 parser.add_argument('--build-cpp-proxy', dest='build_cpp_proxy', action='store_true')
@@ -463,6 +469,9 @@ def main():
 
     if args.start_proxies:
         start_proxy_on_nodes(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging, double_proxy=args.double_proxy)
+
+    if args.setup_venv:
+        setup_venv(controllers)
 
     if args.start_proxies_venv:
         start_proxy_on_nodes_venv(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging, double_proxy=args.double_proxy)
