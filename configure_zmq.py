@@ -115,11 +115,13 @@ COMPUTE_LOGS = [
 PROXY_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
 EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
-PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos9_all.deb"
-PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos9_all.deb"
 
-PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos9_all.deb"
-PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos9_all.deb"
+PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos10_all.deb"
+PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos10_all.deb"
+
+
+PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos10_all.deb"
+PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos10_all.deb"
 
 
 OSLO_MESSAGING_GIT_REPO = "https://git.openstack.org/openstack/oslo.messaging"
