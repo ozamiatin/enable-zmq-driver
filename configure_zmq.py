@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import argparse
+import os
 import subprocess
 
 
@@ -20,6 +21,7 @@ def get_managable_ip_from_node(node):
 
 
 REDIS_HOST = None
+CPP_PROXY_DIR = "/tmp/zeromq-cpp-proxy"
 
 
 CONTROLLER_PROCS = [
@@ -239,7 +241,6 @@ def stop_proxies_on_nodes(nodes):
         exec_remote_configurer(node, command="--kill-proxy", redis_host=REDIS_HOST)
 
 
-
 def install_oslo_messaging_package(package_url, package_name, nodes):
 
     for node in nodes:
@@ -305,7 +306,6 @@ def update_dpkg_keys():
 
 
 def build_cpp_proxy(node):
-    proxy_dir = "/tmp/zeromq-cpp-proxy"
     print get_command_output("ssh %(node)s 'rm -rf %(proxy_dir)s "
                              "&& git clone %(repo)s %(proxy_dir)s "
                              "&& cd %(proxy_dir)s "
@@ -315,9 +315,31 @@ def build_cpp_proxy(node):
                              "&& /bin/bash %(proxy_dir)s/build "
                              "&& /bin/bash %(proxy_dir)s/build_release'" %
                              {"node": node,
-                              "proxy_dir": proxy_dir,
+                              "proxy_dir": CPP_PROXY_DIR,
                               "repo": OSLO_MESSAGING_GIT_REPO,
                               "patch": OSLO_MESSAGING_GIT_BRANCH})
+
+
+def start_cpp_proxy_on_nodes(nodes, use_pub_sub, debug=False, double_proxy=True):
+
+    for node in nodes:
+        print get_managable_ip_from_node(node)
+        if not args.dry_run:
+            generate_config_for_proxy(node, use_pub_sub)
+
+            cpp_proxy_binary = os.path.join(CPP_PROXY_DIR,
+                                            "build-Debug" if debug else "build-Release",
+                                            "zmq-proxy")
+
+            print get_command_output("ssh %(node)s 'nohup  %(proxy_binary)s "
+                                     "--frontend-port 50001 %(backend_port)s --publisher-port 50003 "
+                                     "--config-file=/etc/zmq-proxy/zmq.conf "
+                                     "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" %
+                                     {"node": node,
+                                      "proxy_binary": cpp_proxy_binary,
+                                      "backend_port": "--backend-port 50002" if double_proxy else ""})
+        else:
+            print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
 
 parser = argparse.ArgumentParser()
@@ -325,10 +347,15 @@ parser.add_argument('--dry-run', dest='dry_run', action='store_true')
 parser.add_argument('--install-packages', dest='install_packages',
                     action='store_true')
 parser.add_argument('--update-public-keys', dest='update_public_keys', action='store_true')
+
 parser.add_argument('--start-proxies', dest='start_proxies',
                     action='store_true')
 parser.add_argument('--start-proxies-venv', dest='start_proxies_venv',
                     action='store_true')
+parser.add_argument('--start-proxies-cpp', dest='start_proxies_cpp',
+                    action='store_true')
+parser.add_argument('--build-cpp-proxy', dest='build_cpp_proxy', action='store_true')
+
 parser.add_argument('--double-proxy', dest='double_proxy',
                     action='store_true')
 parser.add_argument('--kill-proxies', dest='kill_proxies',
@@ -369,7 +396,6 @@ parser.add_argument('--generate-config', dest='generate_config', action='store_t
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
 parser.add_argument('--debug', dest='debug', action='store_true')
 
-parser.add_argument('--build-cpp-proxy', dest='build_cpp_proxy', action='store_true')
 
 args = parser.parse_args()
 
@@ -437,6 +463,9 @@ def main():
 
     if args.start_proxies_venv:
         start_proxy_on_nodes_venv(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging, double_proxy=args.double_proxy)
+
+    if args.start_proxies_cpp:
+        start_cpp_proxy_on_nodes(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging, double_proxy=args.double_proxy)
 
     if args.kill_proxies:
         stop_proxies_on_nodes(controllers)
