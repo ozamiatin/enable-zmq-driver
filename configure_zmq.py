@@ -293,7 +293,7 @@ def restart_redis():
 
 def deploy_redis(node):
     update_dpkg_keys()
-    print get_command_output("ssh %s 'apt-get -y install redis-server redis-tools'" % node)
+    print get_command_output("ssh %s 'apt-get -y install git redis-server redis-tools'" % node)
     for controller in controllers:
         print get_command_output("ssh %s 'apt-get -y install redis-tools'" % controller)
     exec_remote_configurer(node, command="--hack-redis", redis_host=REDIS_HOST)
@@ -312,6 +312,7 @@ def update_dpkg_keys():
 
 
 def build_cpp_proxy(node):
+    print get_command_output("ssh %s 'apt-get -y install git'" % node)
     print get_command_output("ssh %(node)s 'rm -rf %(proxy_dir)s "
                              "&& git clone %(repo)s %(proxy_dir)s "
                              "&& cd %(proxy_dir)s "
