@@ -423,7 +423,7 @@ def main():
 
     global REDIS_HOST
     if args.redis_host:
-        REDIS_HOST = get_managable_ip_from_node(args.redis_host)
+        REDIS_HOST = args.redis_host
     else:
         REDIS_HOST = controllers[0]
 

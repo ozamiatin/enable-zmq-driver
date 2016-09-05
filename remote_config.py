@@ -75,7 +75,7 @@ def hack_redis():
     newcontent = []
     for line in content:
         if line.startswith('bind 127.0.0.1'):
-            replacement = 'bind 127.0.0.1 ' + REDIS_HOST
+            replacement = 'bind 127.0.0.1 ' + get_managable_ip_from_node(REDIS_HOST)
             print line + '->' + replacement + '\n'
             newcontent.append(replacement)
         else:
