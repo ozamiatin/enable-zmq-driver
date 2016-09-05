@@ -16,10 +16,6 @@ def get_command_output(cmd):
     return outp.strip()
 
 
-def get_managable_ip_from_node(node):
-    return get_command_output("ssh %s 'hostname'" % node)
-
-
 REDIS_HOST = None
 CPP_PROXY_DIR = "/tmp/zeromq-cpp-proxy"
 VENV_DIR = "/tmp/venv"
@@ -126,6 +122,10 @@ PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos10_all.deb"
 
 OSLO_MESSAGING_GIT_REPO = "https://git.openstack.org/openstack/oslo.messaging"
 OSLO_MESSAGING_GIT_BRANCH = "master"
+
+
+def get_managable_ip_from_node(node):
+    return get_command_output("host %s" % node).split(' ')[-1]
 
 
 def elaborate_processes_on_nodes(nodes, processes, action='restart'):
@@ -423,7 +423,7 @@ def main():
 
     global REDIS_HOST
     if args.redis_host:
-        REDIS_HOST = args.redis_host
+        REDIS_HOST = get_managable_ip_from_node(args.redis_host)
     else:
         REDIS_HOST = controllers[0]
 
