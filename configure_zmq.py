@@ -125,7 +125,7 @@ OSLO_MESSAGING_GIT_BRANCH = "master"
 
 
 def get_managable_ip_from_node(node):
-    return get_command_output("host %s" % node).split(' ')[-1]
+    return get_command_output("ssh %(node)s 'host %(node)s'" % {"node": node}).split(' ')[-1]
 
 
 def elaborate_processes_on_nodes(nodes, processes, action='restart'):
