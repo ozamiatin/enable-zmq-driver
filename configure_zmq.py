@@ -261,7 +261,7 @@ def install_oslo_messaging_package(package_url, package_name, nodes):
 def apt_install_package(nodes, package_name):
     for node in nodes:
         print '\nInstalling %s on %s' % (package_name, node)
-        print get_command_output("ssh %s 'apt-get install %s'" % (node, package_name))
+        print get_command_output("ssh %s 'apt-get -y install %s'" % (node, package_name))
 
 
 def detect_roles():
@@ -293,9 +293,9 @@ def restart_redis():
 
 def deploy_redis(node):
     update_dpkg_keys()
-    print get_command_output("ssh %s 'apt-get install redis-server redis-tools'" % node)
+    print get_command_output("ssh %s 'apt-get -y install redis-server redis-tools'" % node)
     for controller in controllers:
-        print get_command_output("ssh %s 'apt-get install redis-tools'" % controller)
+        print get_command_output("ssh %s 'apt-get -y install redis-tools'" % controller)
     exec_remote_configurer(node, command="--hack-redis", redis_host=REDIS_HOST)
     firewall_ports_open(controllers, [6379, 16379, 26379, 50001, 50002, 50003])
     elaborate_processes_on_nodes([node], ['redis-server'])
