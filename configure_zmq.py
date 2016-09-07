@@ -83,8 +83,8 @@ CONTROLLER_CONFIGS = [
 ]
 
 COMPUTE_CONFIGS = [
-    # '/etc/nova/nova.conf',
-    # '/etc/neutron/neutron.conf',
+    '/etc/nova/nova.conf',
+    '/etc/neutron/neutron.conf',
     '/etc/cinder/cinder.conf'
 ]
 
@@ -493,7 +493,7 @@ def main():
         restart_redis()
 
     if args.hack_configs:
-        #hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
+        hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
         hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
 
     if args.restart_services:
