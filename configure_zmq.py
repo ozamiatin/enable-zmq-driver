@@ -57,7 +57,10 @@ COMPUTE_PROCS = [
     'neutron-metadata-agent',
     'nova-compute',
     'neutron-openvswitch-agent',
-    'neutron-l3-agent'
+    'neutron-l3-agent',
+    'neutron-rootwrap',
+    'cinder-backup',
+    'cinder-volume'
 ]
 
 PCS_RESOURCES = [
