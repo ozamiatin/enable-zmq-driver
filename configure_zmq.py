@@ -269,12 +269,14 @@ def apt_install_package(nodes, package_name):
 
 
 def detect_roles():
-    global controllers, computes
+    global controllers, controller0, computes
     fuel_columns_count = int(get_command_output("fuel nodes 2>&1 | grep controller | awk '{ print NF }'").split('\n')[0])
     assert fuel_columns_count == EXPECTED_NUMBER_OF_FUEL_COLUMNS, "Columns have to match %d expected value" % EXPECTED_NUMBER_OF_FUEL_COLUMNS
 
     controllers = get_command_output("fuel nodes 2>&1 | grep controller | awk '{ print $9 }'").split('\n')
     computes = get_command_output("fuel nodes 2>&1 | grep compute | awk '{ print $9 }'").split('\n')
+
+    controller0 = get_command_output("fuel nodes 2>&1 | grep controller_0 | awk '{ print $9 }'")
 
     if args.dry_run:
         controllers = controllers[:1]
@@ -417,6 +419,7 @@ args = parser.parse_args()
 
 controllers = []
 computes = []
+controller0 = None
 
 
 def main():
@@ -430,7 +433,7 @@ def main():
     if args.redis_host:
         REDIS_HOST = args.redis_host
     else:
-        REDIS_HOST = controllers[0]
+        REDIS_HOST = controller0
 
     global OSLO_MESSAGING_GIT_REPO
     if args.git_repo:
