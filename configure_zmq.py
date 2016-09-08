@@ -172,24 +172,26 @@ def exec_remote_configurer(node, command="", **kwargs):
     paste_remote_configurer(node)
     file_name = kwargs.get("file")
     print get_command_output("ssh %(node)s 'python /tmp/remote_config.py %(cmd)s "
-                             "--redis-host %(redis_host)s%(file)s%(use_pub_sub)s%(debug)s%(double_proxy)s'" %
+                             "--redis-host %(redis_host)s%(file)s%(use_pub_sub)s%(debug)s%(use_acks)s%(double_proxy)s'" %
                              {"node": node,
                               "cmd": command,
                               "redis_host": kwargs.pop("redis_host", REDIS_HOST),
                               "file": " --file %s" % file_name if file_name else "",
                               "use_pub_sub": " --use-pub-sub" if kwargs.pop("use_pub_sub", False) else "",
                               "debug": " --debug" if kwargs.pop("debug", False) else "",
+                              "use_acks": " --use-acks" if kwargs.pop("use_acks", False) else "",
                               "double_proxy": " --double-proxy" if kwargs.pop("double_proxy", False) else ""})
 
 
-def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, debug=False):
+def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, debug=False, use_acks=False):
     for node in nodes:
         print '\nHacking configs on %s' % node
 
         for conf_file in configs:
             print 'Editing %s' % conf_file
             if not args.dry_run:
-                exec_remote_configurer(node, command="--hack", redis_host=REDIS_HOST, file=conf_file, use_pub_sub=use_pub_sub, debug=debug)
+                exec_remote_configurer(node, command="--hack", redis_host=REDIS_HOST, file=conf_file,
+                                       use_pub_sub=use_pub_sub, debug=debug, use_acks=use_acks)
 
 
 def restore_configs(nodes, configs):
@@ -424,6 +426,7 @@ parser.add_argument('--git-branch', dest='git_branch', type=str)
 parser.add_argument('--generate-config', dest='generate_config', action='store_true')
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
 parser.add_argument('--debug', dest='debug', action='store_true')
+parser.add_argument('--use-acks', dest='use_acks', action='store_true')
 
 
 args = parser.parse_args()
@@ -507,8 +510,8 @@ def main():
         restart_redis()
 
     if args.hack_configs:
-        hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS, use_pub_sub=use_pub_sub, debug=use_debug_logging)
-        hack_configs_on_nodes(computes, COMPUTE_CONFIGS, use_pub_sub=use_pub_sub, debug=use_debug_logging)
+        hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS, use_pub_sub=use_pub_sub, debug=use_debug_logging, use_acks=args.use_acks)
+        hack_configs_on_nodes(computes, COMPUTE_CONFIGS, use_pub_sub=use_pub_sub, debug=use_debug_logging, use_acks=args.use_acks)
 
     if args.restore_configs:
         restore_configs(controllers, CONTROLLER_CONFIGS)
