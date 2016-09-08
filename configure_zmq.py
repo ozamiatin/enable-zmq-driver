@@ -507,8 +507,8 @@ def main():
         restart_redis()
 
     if args.hack_configs:
-        hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
-        hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
+        hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS, use_pub_sub=use_pub_sub, debug=use_debug_logging)
+        hack_configs_on_nodes(computes, COMPUTE_CONFIGS, use_pub_sub=use_pub_sub, debug=use_debug_logging)
 
     if args.restore_configs:
         restore_configs(controllers, CONTROLLER_CONFIGS)
