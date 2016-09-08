@@ -8,7 +8,7 @@ python configure_zmq.py --redis-host <host-n> --deploy-redis
 ```
 
 ```bash
-python configure_zmq.py --redis-host <host-n> --setup-venv
+python configure_zmq.py --redis-host <host-n> --setup-venv --git-repo <http-repo-address> --git-branch <master>
 ```
 
 ```bash
