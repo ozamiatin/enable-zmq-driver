@@ -189,8 +189,17 @@ def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, debug=False):
         for conf_file in configs:
             print 'Editing %s' % conf_file
             if not args.dry_run:
-                print get_command_output("ssh %s 'rm /tmp/hack_config_with_zmq.pyc'" % node)
                 exec_remote_configurer(node, command="--hack", redis_host=REDIS_HOST, file=conf_file, use_pub_sub=use_pub_sub, debug=debug)
+
+
+def restore_configs(nodes, configs):
+    for node in nodes:
+        print '\nHacking configs on %s' % node
+
+        for conf_file in configs:
+            print 'Editing %s' % conf_file
+            if not args.dry_run:
+                exec_remote_configurer(node, command="--restore-backup")
 
 
 def generate_config_for_proxy(node, use_pub_sub):
@@ -386,6 +395,8 @@ parser.add_argument('--start-services', dest='start_services',
                     action='store_true')
 parser.add_argument('--hack-configs', dest='hack_configs',
                     action='store_true')
+parser.add_argument('--restore-configs', dest='restore_configs',
+                    action='store_true')
 parser.add_argument('--clear-logs', dest='clear_logs',
                     action='store_true')
 parser.add_argument('--install-pyredis', dest='install_pyredis',
@@ -498,6 +509,10 @@ def main():
     if args.hack_configs:
         hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS)
         hack_configs_on_nodes(computes, COMPUTE_CONFIGS)
+
+    if args.restore_configs:
+        restore_configs(controllers, CONTROLLER_CONFIGS)
+        restore_configs(computes, COMPUTE_CONFIGS)
 
     if args.restart_services:
         elaborate_resources(controllers[0], PCS_RESOURCES, 'restart')

@@ -85,6 +85,18 @@ def hack_redis():
         fl.write(''.join(newcontent))
 
 
+def restore_backup():
+    file_name = args.file_name
+    backup_file_name = file_name+".backup"
+    if not os.path.isfile(backup_file_name):
+        raise RuntimeWarning("No backup found for %s. Operation is skipped." % file_name)
+
+    if os.path.isfile(file_name):
+        print get_command_output("rm -rf %s" % file_name)
+
+    print get_command_output("mv %s %s" % (backup_file_name, file_name))
+
+
 def hack_services(debug):
 
     file_name = args.file_name
@@ -144,6 +156,7 @@ parser.add_argument('--double-proxy', dest='double_proxy', action='store_true')
 parser.add_argument('--kill-proxy', dest='kill_proxy', action='store_true')
 parser.add_argument('--debug', dest='debug', action='store_true')
 parser.add_argument('--hack', dest='hack', action='store_true')
+parser.add_argument('--restore-backup', dest='restore_backup', action='store_true')
 parser.add_argument('--hack-redis', dest='hack_redis', action='store_true')
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
 parser.add_argument('--file', dest='file_name', type=str)
@@ -161,6 +174,8 @@ if __name__ == "__main__":
             generate_proxy_conf(use_pub_sub)
         elif args.hack:
             hack_services(args.debug)
+        elif args.restore_backup:
+            restore_backup()
         elif args.hack_redis:
             hack_redis()
         elif args.kill_proxy:
