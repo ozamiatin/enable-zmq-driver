@@ -13,9 +13,9 @@ DEFAULT = re.compile('^\s*\[DEFAULT\]\s*$')
 REDIS_SECTION = re.compile('^\s*\[matchmaker_redis\]\s*$')
 ZMQ_SECTION = re.compile('^\s*\[oslo_messaging_zmq\]\s*$')
 
-IGNORE=['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host',
-        'default_log_levels', 'sentinel_hosts']
-
+IGNORE = ['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host',
+          'default_log_levels', 'sentinel_hosts', 'use_router_proxy',
+          'rpc_use_acks', 'host']
 
 def get_command_output(cmd):
     print 'Executing cmd: %s' % cmd
