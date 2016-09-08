@@ -199,7 +199,7 @@ def restore_configs(nodes, configs):
         for conf_file in configs:
             print 'Editing %s' % conf_file
             if not args.dry_run:
-                exec_remote_configurer(node, command="--restore-backup")
+                exec_remote_configurer(node, command="--restore-backup", file=conf_file)
 
 
 def generate_config_for_proxy(node, use_pub_sub):
