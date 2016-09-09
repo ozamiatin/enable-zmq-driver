@@ -13,9 +13,9 @@ DEFAULT = re.compile('^\s*\[DEFAULT\]\s*$')
 REDIS_SECTION = re.compile('^\s*\[matchmaker_redis\]\s*$')
 ZMQ_SECTION = re.compile('^\s*\[oslo_messaging_zmq\]\s*$')
 
-IGNORE=['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host',
-        'default_log_levels', 'sentinel_hosts']
-
+IGNORE = ['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host',
+          'default_log_levels', 'sentinel_hosts', 'use_router_proxy',
+          'rpc_use_acks', 'host']
 
 def get_command_output(cmd):
     print 'Executing cmd: %s' % cmd
@@ -85,7 +85,19 @@ def hack_redis():
         fl.write(''.join(newcontent))
 
 
-def hack_services(debug):
+def restore_backup():
+    file_name = args.file_name
+    backup_file_name = file_name+".backup"
+    if not os.path.isfile(backup_file_name):
+        raise RuntimeWarning("No backup found for %s. Operation is skipped." % file_name)
+
+    if os.path.isfile(file_name):
+        print get_command_output("rm -rf %s" % file_name)
+
+    print get_command_output("mv %s %s" % (backup_file_name, file_name))
+
+
+def hack_services(debug, use_acks):
 
     file_name = args.file_name
     with open(file_name, 'r') as fl:
@@ -128,7 +140,7 @@ def hack_services(debug):
     newcontent.append('[oslo_messaging_zmq]\n')
     newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
     newcontent.append('use_router_proxy = true\n')
-    newcontent.append('rpc_use_acks = false\n')
+    newcontent.append('rpc_use_acks = %s\n' % "true" if use_acks else "false")
     newcontent.append('rpc_zmq_matchmaker = redis\n')
     newcontent.append('[matchmaker_redis]\n')
     newcontent.append('host=%s\n' % REDIS_HOST)
@@ -143,7 +155,9 @@ parser.add_argument('--start-proxy', dest='start_proxy', action='store_true')
 parser.add_argument('--double-proxy', dest='double_proxy', action='store_true')
 parser.add_argument('--kill-proxy', dest='kill_proxy', action='store_true')
 parser.add_argument('--debug', dest='debug', action='store_true')
+parser.add_argument('--use-acks', dest='use_acks', action='store_true')
 parser.add_argument('--hack', dest='hack', action='store_true')
+parser.add_argument('--restore-backup', dest='restore_backup', action='store_true')
 parser.add_argument('--hack-redis', dest='hack_redis', action='store_true')
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
 parser.add_argument('--file', dest='file_name', type=str)
@@ -160,7 +174,9 @@ if __name__ == "__main__":
             use_pub_sub = True if args.use_pub_sub else False
             generate_proxy_conf(use_pub_sub)
         elif args.hack:
-            hack_services(args.debug)
+            hack_services(args.debug, args.use_acks)
+        elif args.restore_backup:
+            restore_backup()
         elif args.hack_redis:
             hack_redis()
         elif args.kill_proxy:
