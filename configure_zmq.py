@@ -46,11 +46,29 @@ CONTROLLER_PROCS = [
 
     'glance-api',
     'glance-registry',
+    'glance-glare',
 
     'heat-api',
     'heat-api-cfn',
     'heat-api-cloudwatch',
     'heat-engine',
+
+    'swift-proxy-server',
+
+    'swift-object-server',
+    'swift-object-updater',
+    'swift-object-auditor',
+    'swift-object-replicator',
+
+    'swift-container-updater',
+    'swift-container-sync',
+    'swift-container-server'
+    'swift-container-auditor',
+
+    'swift-account-auditor',
+    'swift-account-server',
+    'swift-account-replicator',
+    'swift-account-reaper'
 ]
 
 COMPUTE_PROCS = [
@@ -79,7 +97,13 @@ CONTROLLER_CONFIGS = [
 #    '/etc/murano/murano.conf',
     '/etc/glance/glance-registry.conf',
     '/etc/glance/glance-api.conf',
+    '/etc/glance/glance-glare.conf',
     '/etc/heat/heat.conf',
+
+    '/etc/swift/proxy-server.conf'
+    '/etc/swift/object-server.conf',
+    '/etc/swift/container-server.conf',
+    '/etc/swift/account-server.conf'
 ]
 
 COMPUTE_CONFIGS = [
@@ -426,6 +450,7 @@ parser.add_argument('--git-branch', dest='git_branch', type=str)
 parser.add_argument('--generate-config', dest='generate_config', action='store_true')
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
 parser.add_argument('--debug', dest='debug', action='store_true')
+parser.add_argument('--log-level', dest='log_level', type=str)
 parser.add_argument('--use-acks', dest='use_acks', action='store_true')
 
 
