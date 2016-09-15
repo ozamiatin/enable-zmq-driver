@@ -140,7 +140,7 @@ def hack_services(debug, use_acks):
     newcontent.append('[oslo_messaging_zmq]\n')
     newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
     newcontent.append('use_router_proxy = true\n')
-    newcontent.append('rpc_use_acks = %s\n' % "true" if use_acks else "false")
+    newcontent.append('rpc_use_acks = %s\n' % ("true" if use_acks else "false"))
     newcontent.append('rpc_zmq_matchmaker = redis\n')
     newcontent.append('[matchmaker_redis]\n')
     newcontent.append('host=%s\n' % REDIS_HOST)
