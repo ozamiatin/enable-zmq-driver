@@ -338,7 +338,8 @@ def deploy_redis(node):
     for controller in controllers:
         print get_command_output("ssh %s 'apt-get -y install redis-tools'" % controller)
     exec_remote_configurer(node, command="--hack-redis", redis_host=REDIS_HOST)
-    firewall_ports_open(controllers, [6379, 16379, 26379, 50001, 50002, 50003])
+    firewall_ports_open(controllers, [6379, 16379, 26379, 50001, 50002, 50003,
+                                      30001, 30002, 30003, 40001, 40002, 40003])
     elaborate_processes_on_nodes([node], ['redis-server'])
 
 
@@ -383,12 +384,12 @@ def start_cpp_proxy_on_nodes(nodes, use_pub_sub, debug=False, double_proxy=True)
                                             "zmq-proxy")
 
             print get_command_output("ssh %(node)s 'nohup  %(proxy_binary)s "
-                                     "--frontend-port 50001 %(backend_port)s --publisher-port 50003 "
+                                     "--frontend-port 30001 %(backend_port)s --publisher-port 30003 "
                                      "--config-file=/etc/zmq-proxy/zmq.conf "
                                      "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" %
                                      {"node": node,
                                       "proxy_binary": cpp_proxy_binary,
-                                      "backend_port": "--backend-port 50002" if double_proxy else ""})
+                                      "backend_port": "--backend-port 30002" if double_proxy else ""})
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
