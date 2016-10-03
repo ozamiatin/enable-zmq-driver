@@ -97,7 +97,7 @@ def restore_backup():
     print get_command_output("mv %s %s" % (backup_file_name, file_name))
 
 
-def hack_services(debug, use_acks):
+def hack_services(debug, use_acks, use_router_proxy):
 
     file_name = args.file_name
     with open(file_name, 'r') as fl:
@@ -139,7 +139,8 @@ def hack_services(debug, use_acks):
 
     newcontent.append('[oslo_messaging_zmq]\n')
     newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
-    newcontent.append('use_router_proxy = true\n')
+    newcontent.append('zmq_linger = 20\n')
+    newcontent.append('use_router_proxy = %s\n' % ("true" if use_router_proxy else "false"))
     newcontent.append('rpc_use_acks = %s\n' % ("true" if use_acks else "false"))
     newcontent.append('rpc_zmq_matchmaker = redis\n')
     newcontent.append('[matchmaker_redis]\n')
@@ -160,6 +161,7 @@ parser.add_argument('--hack', dest='hack', action='store_true')
 parser.add_argument('--restore-backup', dest='restore_backup', action='store_true')
 parser.add_argument('--hack-redis', dest='hack_redis', action='store_true')
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
+parser.add_argument('--use-router-proxy', dest='use_router_proxy', action='store_true')
 parser.add_argument('--file', dest='file_name', type=str)
 parser.add_argument('--redis-host', dest='redis_host', type=str)
 args = parser.parse_args()
