@@ -139,7 +139,10 @@ def hack_services(debug, use_acks, use_router_proxy):
 
     newcontent.append('[oslo_messaging_zmq]\n')
     newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
-    newcontent.append('zmq_linger = 20\n')
+
+    if not use_router_proxy:
+        newcontent.append('zmq_linger = 20\n')
+
     newcontent.append('use_router_proxy = %s\n' % ("true" if use_router_proxy else "false"))
     newcontent.append('rpc_use_acks = %s\n' % ("true" if use_acks else "false"))
     newcontent.append('rpc_zmq_matchmaker = redis\n')
@@ -176,7 +179,7 @@ if __name__ == "__main__":
             use_pub_sub = True if args.use_pub_sub else False
             generate_proxy_conf(use_pub_sub)
         elif args.hack:
-            hack_services(args.debug, args.use_acks)
+            hack_services(args.debug, args.use_acks, args.use_router_proxy)
         elif args.restore_backup:
             restore_backup()
         elif args.hack_redis:
