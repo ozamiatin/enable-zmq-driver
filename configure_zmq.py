@@ -313,6 +313,8 @@ def detect_roles():
 
     controller0 = get_command_output("fuel nodes 2>&1 | grep controller_0 | awk '{ print $9 }'")
 
+    print "Controller0 = %s" % controller0
+
     if args.dry_run:
         controllers = controllers[:1]
         computes = computes[:2]
@@ -468,6 +470,8 @@ def main():
         print 'Performing dry run'
 
     detect_roles()
+
+    return
 
     global REDIS_HOST
     if args.redis_host:
