@@ -471,8 +471,6 @@ def main():
 
     detect_roles()
 
-    return
-
     global REDIS_HOST
     if args.redis_host:
         REDIS_HOST = args.redis_host
