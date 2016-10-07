@@ -311,7 +311,7 @@ def detect_roles():
     controllers = get_command_output("fuel nodes 2>&1 | grep controller | awk '{ print $9 }'").split('\n')
     computes = get_command_output("fuel nodes 2>&1 | grep compute | awk '{ print $9 }'").split('\n')
 
-    controller0 = get_command_output("fuel nodes 2>&1 | grep controller_0 | awk '{ print $9 }'")
+    controller0 = "node-" + get_command_output("fuel nodes 2>&1 | grep controller_0 | awk '{ print $1 }'")
 
     print "Controller0 = %s" % controller0
 
