@@ -140,11 +140,20 @@ PROXY_EXECUTABLE_NAME = "oslo-messaging-zmq-proxy"
 EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
 
-PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos10_all.deb"
+# PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos10_all.deb"
+# PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos10_all.deb"
+#
+#
+# PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos10_all.deb"
+# PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos10_all.deb"
+
+
+
+PACKAGE_URL = "http://172.18.162.63/review/CR-27279/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos10_all.deb"
 PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos10_all.deb"
 
 
-PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-19937/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos10_all.deb"
+PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-27279/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos10_all.deb"
 PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos10_all.deb"
 
 
@@ -450,6 +459,10 @@ parser.add_argument('--redis-host', dest='redis_host', type=str)
 
 parser.add_argument('--git-repo', dest='git_repo', type=str)
 parser.add_argument('--git-branch', dest='git_branch', type=str)
+parser.add_argument('--package-url', dest='package_url', type=str)
+parser.add_argument('--package-name', dest='package_name', type=str)
+parser.add_argument('--proxy-package-url', dest='proxy_package_url', type=str)
+parser.add_argument('--proxy-package-name', dest='proxy_package_name', type=str)
 
 parser.add_argument('--generate-config', dest='generate_config', action='store_true')
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
@@ -486,6 +499,18 @@ def main():
     global OSLO_MESSAGING_GIT_BRANCH
     if args.git_branch:
         OSLO_MESSAGING_GIT_BRANCH = args.git_branch
+
+    global PACKAGE_NAME, PACKAGE_URL
+    global PROXY_PACKAGE_NAME, PROXY_PACKAGE_URL
+
+    if args.package_url:
+        PACKAGE_URL = args.package_url
+    if args.proxy_package_url:
+        PROXY_PACKAGE_URL = args.proxy_package_url
+    if args.package_name:
+        PACKAGE_NAME = args.package_name
+    if args.proxy_package_name:
+        PROXY_PACKAGE_NAME = args.proxy_package_name
 
     use_pub_sub = args.use_pub_sub if args.use_pub_sub else False
     use_debug_logging = args.debug if args.debug else False
