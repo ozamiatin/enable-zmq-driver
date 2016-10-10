@@ -17,6 +17,11 @@ IGNORE = ['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host',
           'default_log_levels', 'sentinel_hosts', 'use_router_proxy',
           'rpc_use_acks', 'host']
 
+FRONTEND_PORT = 50001
+BACKEND_PORT = 50002
+PUBLISHER_PORT = 50003
+
+
 def get_command_output(cmd):
     print 'Executing cmd: %s' % cmd
     pp = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -45,11 +50,13 @@ def start_proxy(debug, use_pub_sub, double_router):
     generate_proxy_conf(use_pub_sub)
     print get_command_output("rm -rf /var/log/zmq-proxy.log")
     print get_command_output("nohup /tmp/venv/bin/python /tmp/oslo.messaging/oslo_messaging/_cmd/zmq_proxy.py %(debug)s "
-                             "--frontend-port 30001 %(backend_port)s --publisher-port 30003 "
+                             "--frontend-port %(fe)s %(backend_port)s --publisher-port %(pub)s "
                              "--config-file=/etc/zmq-proxy/zmq.conf "
                              "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &" %
                              {"debug": "--debug True" if debug else "",
-                              "backend_port": "--backend-port 30002" if double_router else ""})
+                              "fe": FRONTEND_PORT,
+                              "pub": PUBLISHER_PORT,
+                              "backend_port": "--backend-port %s" % BACKEND_PORT if double_router else ""})
 
 
 def kill_proxy():
