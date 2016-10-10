@@ -304,7 +304,7 @@ def install_oslo_messaging_package(package_url, package_name, nodes):
             print get_command_output("ssh %s 'mkdir /tmp/zmq-package/'" % node)
             print get_command_output("ssh %s 'wget -N -O /tmp/zmq-package/%s "
                                      "%s'" % (node, package_name, package_url))
-            print get_command_output("ssh %s 'dpkg -i /tmp/zmq-package/%s'" % (node, package_name))
+            print get_command_output("ssh %s 'dpkg --force-overwrite -i /tmp/zmq-package/%s'" % (node, package_name))
 
 
 def apt_install_package(nodes, package_name):
