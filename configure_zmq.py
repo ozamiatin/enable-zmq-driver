@@ -258,7 +258,7 @@ def start_proxy_on_nodes(nodes, use_pub_sub, debug=False, double_proxy=False):
                                      "--config-file=/etc/zmq-proxy/zmq.conf "
                                      "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log  &'" %
                                      {"node": node,
-                                      "debug": "--debug True" if debug else "",
+                                      "debug": "--debug" if debug else "",
                                       "fe": FRONTEND_PORT,
                                       "pub": PUBLISHER_PORT,
                                       "backend_port": "--backend-port %s" % BACKEND_PORT if double_proxy else ""})

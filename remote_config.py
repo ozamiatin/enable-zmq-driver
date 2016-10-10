@@ -53,7 +53,7 @@ def start_proxy(debug, use_pub_sub, double_router):
                              "--frontend-port %(fe)s %(backend_port)s --publisher-port %(pub)s "
                              "--config-file=/etc/zmq-proxy/zmq.conf "
                              "> /var/log/zmq-proxy.log 2>&1 < /var/log/zmq-proxy.log &" %
-                             {"debug": "--debug True" if debug else "",
+                             {"debug": "--debug" if debug else "",
                               "fe": FRONTEND_PORT,
                               "pub": PUBLISHER_PORT,
                               "backend_port": "--backend-port %s" % BACKEND_PORT if double_router else ""})
