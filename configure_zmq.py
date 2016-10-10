@@ -329,6 +329,9 @@ def detect_roles():
 
     controller0 = "node-" + get_command_output("fuel nodes 2>&1 | grep controller_0 | awk '{ print $1 }'")
 
+    if not controllers or not computes:
+        raise RuntimeError("Nodes discovery step failure. Please run again.")
+
     print "Controller0 = %s" % controller0
 
     if args.dry_run:
