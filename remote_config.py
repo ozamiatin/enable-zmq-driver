@@ -104,7 +104,7 @@ def restore_backup():
     print get_command_output("mv %s %s" % (backup_file_name, file_name))
 
 
-def hack_services(debug, use_acks, use_router_proxy):
+def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
 
     file_name = args.file_name
     with open(file_name, 'r') as fl:
@@ -151,6 +151,7 @@ def hack_services(debug, use_acks, use_router_proxy):
         newcontent.append('zmq_linger = 20\n')
 
     newcontent.append('use_router_proxy = %s\n' % ("true" if use_router_proxy else "false"))
+    newcontent.append('use_pub_sub = %s\n' % ("true" if use_pub_sub else "false"))
     newcontent.append('rpc_use_acks = %s\n' % ("true" if use_acks else "false"))
     newcontent.append('rpc_zmq_matchmaker = redis\n')
     newcontent.append('[matchmaker_redis]\n')
@@ -186,7 +187,7 @@ if __name__ == "__main__":
             use_pub_sub = True if args.use_pub_sub else False
             generate_proxy_conf(use_pub_sub)
         elif args.hack:
-            hack_services(args.debug, args.use_acks, args.use_router_proxy)
+            hack_services(args.debug, args.use_acks, args.use_router_proxy, args.use_pub_sub)
         elif args.restore_backup:
             restore_backup()
         elif args.hack_redis:
