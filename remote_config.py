@@ -20,6 +20,7 @@ IGNORE = ['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host',
 FRONTEND_PORT = 50001
 BACKEND_PORT = 50002
 PUBLISHER_PORT = 50003
+LOCAL_PUBLISHER_PORT = 60001
 
 
 def get_command_output(cmd):
@@ -149,6 +150,9 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
 
     if not use_router_proxy:
         newcontent.append('zmq_linger = 20\n')
+
+    if not use_pub_sub:
+        newcontent.append('subscribe_on = %s\n' % LOCAL_PUBLISHER_PORT)
 
     newcontent.append('use_router_proxy = %s\n' % ("true" if use_router_proxy else "false"))
     newcontent.append('use_pub_sub = %s\n' % ("true" if use_pub_sub else "false"))

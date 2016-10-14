@@ -23,6 +23,7 @@ VENV_DIR = "/tmp/venv"
 FRONTEND_PORT = 50001
 BACKEND_PORT = 50002
 PUBLISHER_PORT = 50003
+LOCAL_PUBLISHER_PORT = 60001
 
 
 CONTROLLER_PROCS = [
@@ -266,6 +267,23 @@ def start_proxy_on_nodes(nodes, use_pub_sub, debug=False, double_proxy=False):
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
 
+def start_local_publisher_on_nodes(nodes, debug=False):
+    for node in nodes:
+        print get_managable_ip_from_node(node)
+        if not args.dry_run:
+            generate_config_for_proxy(node, True)
+
+            print get_command_output("ssh %(node)s 'nohup oslo-messaging-zmq-proxy %(debug)s "
+                                     "--local-publisher --publisher-port %(pub)s "
+                                     "--config-file=/etc/zmq-proxy/zmq.conf "
+                                     "> /var/log/zmq-local-proxy.log 2>&1 < /var/log/zmq-local-proxy.log  &'" %
+                                     {"node": node,
+                                      "debug": "--debug" if debug else "",
+                                      "pub": LOCAL_PUBLISHER_PORT})
+        else:
+            print '\nStarting oslo-messaging-zmq-proxy on %s' % node
+
+
 def setup_venv(nodes):
     for node in nodes:
         print get_command_output("ssh %s 'apt-get update && apt-get -y install git python-pip virtualenv python-dev'" % node)
@@ -425,6 +443,8 @@ parser.add_argument('--update-public-keys', dest='update_public_keys', action='s
 
 parser.add_argument('--start-proxies', dest='start_proxies',
                     action='store_true')
+parser.add_argument('--start-local-proxies', dest='start_local_proxies',
+                    action='store_true')
 parser.add_argument('--start-proxies-venv', dest='start_proxies_venv',
                     action='store_true')
 parser.add_argument('--setup-venv', dest='setup_venv', action='store_true')
@@ -559,6 +579,9 @@ def main():
 
     if args.start_proxies:
         start_proxy_on_nodes(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging, double_proxy=args.double_proxy)
+
+    if args.start_local_proxies:
+        start_local_publisher_on_nodes(controllers + computes, use_debug_logging)
 
     if args.setup_venv:
         setup_venv(controllers)
