@@ -151,7 +151,7 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
     if not use_router_proxy:
         newcontent.append('zmq_linger = 20\n')
 
-    if not use_pub_sub:
+    if use_pub_sub:
         newcontent.append('subscribe_on = %s\n' % LOCAL_PUBLISHER_PORT)
 
     newcontent.append('use_router_proxy = %s\n' % ("true" if use_router_proxy else "false"))
