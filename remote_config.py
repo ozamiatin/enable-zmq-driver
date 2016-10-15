@@ -137,7 +137,8 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
             newcontent.append('default_log_levels=amqp=WARN,amqplib=WARN,boto=WARN,iso8601=WARN,keystonemiddleware=WARN,oslo.messaging=%(debug)s,oslo_messaging=%(debug)s,qpid=WARN,requests.packages.urllib3.connectionpool=WARN,requests.packages.urllib3.util.retry=WARN,routes.middleware=WARN,sqlalchemy=WARN,stevedore=WARN,suds=INFO,taskflow=WARN,urllib3.connectionpool=WARN,urllib3.util.retry=WARN,websocket=WARN\n' %
                               {"debug": "DEBUG" if debug else "WARN"})
 
-            newcontent.append('rpc_backend = zmq\n')
+            #newcontent.append('rpc_backend = zmq\n')
+            newcontent.append('transport_url = zmq://%s:%s\n' % (REDIS_HOST, REDIS_PORT))
 
         if RPC_BACKEND.match(line) or REDIS_SECTION.match(line) or ZMQ_SECTION.match(line):
             continue
@@ -147,8 +148,6 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
 
         newcontent.append(line)
 
-    newcontent.append('[DEFAULT]\n')
-    newcontent.append('transport_url = zmq://%s:%s\n' % (REDIS_HOST, REDIS_PORT))
     newcontent.append('[oslo_messaging_zmq]\n')
     newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
 
