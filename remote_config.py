@@ -116,10 +116,6 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
     if not os.path.isfile(file_name+".backup"):
         with open(file_name+".backup", 'w') as fl:
             fl.write(''.join(content))
-    else:
-        restore_backup()
-        with open(file_name+".backup", 'w') as fl:
-            fl.write(''.join(content))
 
     newcontent = []
     time_to_put_config = False
