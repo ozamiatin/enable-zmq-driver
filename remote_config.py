@@ -40,7 +40,7 @@ def generate_proxy_conf(use_pub_sub):
     print get_command_output("mkdir /etc/zmq-proxy/")
     with open('/etc/zmq-proxy/zmq.conf', 'w+') as conf_f:
         conf_f.write("[zmq_proxy_opts]\n"
-                     "url = zmq://%(redis_host)s:%(redis_port)s"
+                     "url = zmq://%(redis_host)s:%(redis_port)s\n"
                      "[oslo_messaging_zmq]\n"
                      "rpc_zmq_host=%(rpc_host)s\n"
                      "use_pub_sub=%(pub)s" % {"rpc_host": get_command_output("hostname"),
