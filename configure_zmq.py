@@ -593,7 +593,7 @@ def main():
         start_cpp_proxy_on_nodes(controllers, use_pub_sub=use_pub_sub, debug=use_debug_logging, double_proxy=args.double_proxy)
 
     if args.kill_proxies:
-        stop_proxies_on_nodes(controllers)
+        stop_proxies_on_nodes(controllers + computes)
 
     if args.restart_redis:
         restart_redis()
