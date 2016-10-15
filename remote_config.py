@@ -21,6 +21,7 @@ FRONTEND_PORT = 50001
 BACKEND_PORT = 50002
 PUBLISHER_PORT = 50003
 LOCAL_PUBLISHER_PORT = 60001
+REDIS_PORT = 6379
 
 
 def get_command_output(cmd):
@@ -38,13 +39,14 @@ def generate_proxy_conf(use_pub_sub):
     print get_command_output("rm -rf /etc/zmq-proxy/")
     print get_command_output("mkdir /etc/zmq-proxy/")
     with open('/etc/zmq-proxy/zmq.conf', 'w+') as conf_f:
-        conf_f.write("[oslo_messaging_zmq]\n"
-                     "rpc_zmq_host=%s\n"
-                     "use_pub_sub=%s\n"
-                     "[matchmaker_redis]\n"
-                     "host=%s" % (get_command_output("hostname"),
-                                  "true" if use_pub_sub else "false",
-                                  get_managable_ip_from_node(REDIS_HOST)))
+        conf_f.write("[zmq_proxy_opts]\n"
+                     "url = zmq://%(redis_host)s:%(redis_port)s"
+                     "[oslo_messaging_zmq]\n"
+                     "rpc_zmq_host=%(rpc_host)s\n"
+                     "use_pub_sub=%(pub)s" % {"rpc_host": get_command_output("hostname"),
+                                              "pub": "true" if use_pub_sub else "false",
+                                              "redis_host": get_managable_ip_from_node(REDIS_HOST),
+                                              "redis_port": REDIS_PORT})
 
 
 def start_proxy(debug, use_pub_sub, double_router):
@@ -149,6 +151,8 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
 
         newcontent.append(line)
 
+    newcontent.append('[DEFAULT]\n')
+    newcontent.append('transport_url = zmq://%s:%s\n' % (REDIS_HOST, REDIS_PORT))
     newcontent.append('[oslo_messaging_zmq]\n')
     newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
 
@@ -162,8 +166,6 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
     newcontent.append('use_pub_sub = %s\n' % ("true" if use_pub_sub else "false"))
     newcontent.append('rpc_use_acks = %s\n' % ("true" if use_acks else "false"))
     newcontent.append('rpc_zmq_matchmaker = redis\n')
-    newcontent.append('[matchmaker_redis]\n')
-    newcontent.append('host=%s\n' % REDIS_HOST)
 
     with open(file_name, 'w') as fl:
         fl.write(''.join(newcontent))
