@@ -223,7 +223,7 @@ def exec_remote_configurer(node, command="", **kwargs):
                               "debug": " --debug" if kwargs.pop("debug", False) else "",
                               "use_acks": " --use-acks" if kwargs.pop("use_acks", False) else "",
                               "double_proxy": " --double-proxy" if kwargs.pop("double_proxy", False) else "",
-                              "transport_url": ("--transport-url %s" % transport_url) if transport_url else ""})
+                              "transport_url": (" --transport-url %s" % transport_url) if transport_url else ""})
 
 
 def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, use_router_proxy=True, debug=False, use_acks=False):
