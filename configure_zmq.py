@@ -17,6 +17,7 @@ def get_command_output(cmd):
 
 
 REDIS_HOST = None
+TRANSPORT_URL = ""
 CPP_PROXY_DIR = "/tmp/zeromq-cpp-proxy"
 VENV_DIR = "/tmp/venv"
 
@@ -209,8 +210,10 @@ def paste_remote_configurer(node):
 def exec_remote_configurer(node, command="", **kwargs):
     paste_remote_configurer(node)
     file_name = kwargs.get("file")
+    transport_url = TRANSPORT_URL#kwargs.get("transport_url")
     print get_command_output("ssh %(node)s 'python /tmp/remote_config.py %(cmd)s "
-                             "--redis-host %(redis_host)s%(file)s%(use_pub_sub)s%(use_router_proxy)s%(debug)s%(use_acks)s%(double_proxy)s'" %
+                             "--redis-host %(redis_host)s%(file)s%(use_pub_sub)s%(use_router_proxy)s%(debug)s%(use_acks)s%(double_proxy)s"
+                             "%(transport_url)s'" %
                              {"node": node,
                               "cmd": command,
                               "redis_host": kwargs.pop("redis_host", REDIS_HOST),
@@ -219,7 +222,8 @@ def exec_remote_configurer(node, command="", **kwargs):
                               "use_router_proxy": " --use-router-proxy" if kwargs.pop("use_router_proxy", False) else "",
                               "debug": " --debug" if kwargs.pop("debug", False) else "",
                               "use_acks": " --use-acks" if kwargs.pop("use_acks", False) else "",
-                              "double_proxy": " --double-proxy" if kwargs.pop("double_proxy", False) else ""})
+                              "double_proxy": " --double-proxy" if kwargs.pop("double_proxy", False) else "",
+                              "transport_url": ("--transport-url %s" % transport_url) if transport_url else ""})
 
 
 def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, use_router_proxy=True, debug=False, use_acks=False):
@@ -501,6 +505,7 @@ parser.add_argument('--use-router-proxy', dest='use_router_proxy', action='store
 parser.add_argument('--debug', dest='debug', action='store_true')
 parser.add_argument('--log-level', dest='log_level', type=str)
 parser.add_argument('--use-acks', dest='use_acks', action='store_true')
+parser.add_argument('--transport-url', dest='transport_url', type=str)
 
 
 args = parser.parse_args()
@@ -522,6 +527,10 @@ def main():
         REDIS_HOST = args.redis_host
     else:
         REDIS_HOST = controller0
+
+    global TRANSPORT_URL
+    if args.transport_url:
+        TRANSPORT_URL = args.transport_url
 
     global OSLO_MESSAGING_GIT_REPO
     if args.git_repo:

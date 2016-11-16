@@ -7,6 +7,7 @@ import subprocess
 
 
 REDIS_HOST = ''
+TRANSPORT_URL = ''
 
 RPC_BACKEND = re.compile('^\s*rpc_backend')
 DEFAULT = re.compile('^\s*\[DEFAULT\]\s*$')
@@ -40,13 +41,12 @@ def generate_proxy_conf(use_pub_sub):
     print get_command_output("mkdir /etc/zmq-proxy/")
     with open('/etc/zmq-proxy/zmq.conf', 'w+') as conf_f:
         conf_f.write("[zmq_proxy_opts]\n"
-                     "url = zmq://%(redis_host)s:%(redis_port)s\n"
+                     "url = %(transport_url)s\n"
                      "[oslo_messaging_zmq]\n"
                      "rpc_zmq_host=%(rpc_host)s\n"
                      "use_pub_sub=%(pub)s" % {"rpc_host": get_command_output("hostname"),
                                               "pub": "true" if use_pub_sub else "false",
-                                              "redis_host": get_managable_ip_from_node(REDIS_HOST),
-                                              "redis_port": REDIS_PORT})
+                                              "transport_url": TRANSPORT_URL})
 
 
 def start_proxy(debug, use_pub_sub, double_router):
@@ -138,7 +138,7 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
                               {"debug": "DEBUG" if debug else "WARN"})
 
             #newcontent.append('rpc_backend = zmq\n')
-            newcontent.append('transport_url = zmq://%s:%s\n' % (REDIS_HOST, REDIS_PORT))
+            newcontent.append('transport_url = %s' % TRANSPORT_URL)
 
         if RPC_BACKEND.match(line) or REDIS_SECTION.match(line) or ZMQ_SECTION.match(line):
             continue
@@ -180,19 +180,29 @@ parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
 parser.add_argument('--use-router-proxy', dest='use_router_proxy', action='store_true')
 parser.add_argument('--file', dest='file_name', type=str)
 parser.add_argument('--redis-host', dest='redis_host', type=str)
+parser.add_argument('--transport-url', dest='transport_url', type=str)
 args = parser.parse_args()
 
 
 if __name__ == "__main__":
-    global REDIS_HOST
+    global REDIS_HOST, TRANSPORT_URL
     try:
         REDIS_HOST = args.redis_host
+
+        if args.transport_url:
+            TRANSPORT_URL = args.transport_url
+        else:
+            TRANSPORT_URL = 'zmq://%s:%s\n' % (get_managable_ip_from_node(REDIS_HOST), REDIS_PORT)
+
 
         if args.generate:
             use_pub_sub = True if args.use_pub_sub else False
             generate_proxy_conf(use_pub_sub)
         elif args.hack:
-            hack_services(args.debug, args.use_acks, args.use_router_proxy, args.use_pub_sub)
+            hack_services(args.debug,
+                          args.use_acks,
+                          args.use_router_proxy,
+                          args.use_pub_sub)
         elif args.restore_backup:
             restore_backup()
         elif args.hack_redis:
