@@ -160,6 +160,8 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
     newcontent.append('use_router_proxy = %s\n' % ("true" if use_router_proxy else "false"))
     newcontent.append('use_pub_sub = %s\n' % ("true" if use_pub_sub else "false"))
     newcontent.append('rpc_use_acks = %s\n' % ("true" if use_acks else "false"))
+    newcontent.append('zmq_target_update = %s\n' % "15")
+    newcontent.append('zmq_target_expire = %s\n' % "20")
     newcontent.append('rpc_zmq_matchmaker = redis\n')
 
     with open(file_name, 'w') as fl:
