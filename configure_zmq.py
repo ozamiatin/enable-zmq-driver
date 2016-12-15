@@ -251,6 +251,9 @@ def restore_configs(nodes, configs):
 def generate_config_for_proxy(node, use_pub_sub):
     exec_remote_configurer(node, command="--generate", redis_host=REDIS_HOST, use_pub_sub=use_pub_sub)
 
+def generate_config_for_redis_proxy(node, use_pub_sub):
+    exec_remote_configurer(node, command="--generate-redis-proxy", redis_host=REDIS_HOST, use_pub_sub=use_pub_sub)
+
 
 def start_proxy_on_nodes(nodes, use_pub_sub, debug=False, double_proxy=False):
 
@@ -293,11 +296,11 @@ def start_redis_proxies_on_nodes(nodes, debug=False):
     for node in nodes:
         print get_managable_ip_from_node(node)
         if not args.dry_run:
-            generate_config_for_proxy(node, True)
+            generate_config_for_redis_proxy(node, True)
 
             print get_command_output("ssh %(node)s 'nohup oslo-messaging-zmq-proxy %(debug)s "
                                      "--redis-proxy --frontend-port %(port)s "
-                                     "--config-file=/etc/zmq-proxy/zmq.conf "
+                                     "--config-file=/etc/zmq-proxy/zmq-redis-proxy.conf "
                                      "> /var/log/zmq-redis-proxy.log 2>&1 < /var/log/zmq-redis-proxy.log  &'" %
                                      {"node": node,
                                       "debug": "--debug" if debug else "",

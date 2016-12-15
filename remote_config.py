@@ -50,6 +50,19 @@ def generate_proxy_conf(use_pub_sub):
                                               "transport_url": TRANSPORT_URL})
 
 
+def generate_redis_proxy_conf():
+    print get_command_output("rm -rf /etc/zmq-proxy/")
+    print get_command_output("mkdir /etc/zmq-proxy/")
+    with open('/etc/zmq-proxy/zmq-redis-proxy.conf', 'w+') as conf_f:
+        conf_f.write("[zmq_proxy_opts]\n"
+                     "url = %(transport_url)s\n"
+                     "[oslo_messaging_zmq]\n"
+                     "rpc_zmq_host=%(rpc_host)s\n"
+                     "use_pub_sub=false\n"
+                     "use_dynamic_connections=false\n"
+                     "use_router_proxy=false\n" % {"rpc_host": get_command_output("hostname"),
+                                                   "transport_url": TRANSPORT_URL})
+
 def start_proxy(debug, use_pub_sub, double_router):
     generate_proxy_conf(use_pub_sub)
     print get_command_output("rm -rf /var/log/zmq-proxy.log")
@@ -174,6 +187,7 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--generate', dest='generate', action='store_true')
+parser.add_argument('--generate-redis-proxy', dest='generate_redis_proxy', action='store_true')
 parser.add_argument('--start-proxy', dest='start_proxy', action='store_true')
 parser.add_argument('--double-proxy', dest='double_proxy', action='store_true')
 parser.add_argument('--kill-proxy', dest='kill_proxy', action='store_true')
@@ -209,6 +223,8 @@ if __name__ == "__main__":
                           args.use_acks,
                           args.use_router_proxy,
                           args.use_pub_sub)
+        elif args.generate_redis_proxy:
+            generate_redis_proxy_conf()
         elif args.restore_backup:
             restore_backup()
         elif args.hack_redis:
