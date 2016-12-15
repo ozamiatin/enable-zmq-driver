@@ -25,6 +25,7 @@ FRONTEND_PORT = 50001
 BACKEND_PORT = 50002
 PUBLISHER_PORT = 50003
 LOCAL_PUBLISHER_PORT = 60001
+LOCAL_REDIS_PROXY_PORT = 40001
 
 
 CONTROLLER_PROCS = [
@@ -155,11 +156,10 @@ EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
 
 
-PACKAGE_URL = "http://172.18.162.63/review/CR-27279/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos16_all.deb"
+PACKAGE_URL = "http://172.18.162.63/review/CR-29351/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos16_all.deb"
 PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos16_all.deb"
 
-
-PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-27279/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos16_all.deb"
+PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-29351/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos16_all.deb"
 PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos16_all.deb"
 
 
@@ -234,7 +234,8 @@ def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, use_router_proxy=Tru
             print 'Editing %s' % conf_file
             if not args.dry_run:
                 exec_remote_configurer(node, command="--hack", redis_host=REDIS_HOST, file=conf_file,
-                                       use_pub_sub=use_pub_sub, use_router_proxy=use_router_proxy, debug=debug, use_acks=use_acks)
+                                       use_pub_sub=use_pub_sub, use_router_proxy=use_router_proxy, debug=debug, use_acks=use_acks # , transport_url=TRANSPORT_URL
+                                       )
 
 
 def restore_configs(nodes, configs):
@@ -284,6 +285,23 @@ def start_local_publisher_on_nodes(nodes, debug=False):
                                      {"node": node,
                                       "debug": "--debug" if debug else "",
                                       "pub": LOCAL_PUBLISHER_PORT})
+        else:
+            print '\nStarting oslo-messaging-zmq-proxy on %s' % node
+
+
+def start_redis_proxies_on_nodes(nodes, debug=False):
+    for node in nodes:
+        print get_managable_ip_from_node(node)
+        if not args.dry_run:
+            generate_config_for_proxy(node, True)
+
+            print get_command_output("ssh %(node)s 'nohup oslo-messaging-zmq-proxy %(debug)s "
+                                     "--redis-proxy --frontent-port %(port)s "
+                                     "--config-file=/etc/zmq-proxy/zmq.conf "
+                                     "> /var/log/zmq-redis-proxy.log 2>&1 < /var/log/zmq-redis-proxy.log  &'" %
+                                     {"node": node,
+                                      "debug": "--debug" if debug else "",
+                                      "port": LOCAL_REDIS_PROXY_PORT})
         else:
             print '\nStarting oslo-messaging-zmq-proxy on %s' % node
 
@@ -591,6 +609,7 @@ def main():
 
     if args.start_local_proxies:
         start_local_publisher_on_nodes(controllers + computes, use_debug_logging)
+        start_redis_proxies_on_nodes(controllers + computes, use_debug_logging)
 
     if args.setup_venv:
         setup_venv(controllers)
