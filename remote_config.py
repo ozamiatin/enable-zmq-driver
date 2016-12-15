@@ -18,9 +18,9 @@ IGNORE = ['debug', 'rpc_backend', 'rpc_zmq_matchmaker', 'rpc_zmq_host',
           'default_log_levels', 'sentinel_hosts', 'use_router_proxy',
           'rpc_use_acks', 'host']
 
-FRONTEND_PORT = 50001
-BACKEND_PORT = 50002
-PUBLISHER_PORT = 50003
+FRONTEND_PORT = 30001
+BACKEND_PORT = 30002
+PUBLISHER_PORT = 30003
 LOCAL_PUBLISHER_PORT = 60001
 LOCAL_REDIS_PROXY_PORT = 40001
 REDIS_PORT = 6379
