@@ -296,7 +296,7 @@ def start_redis_proxies_on_nodes(nodes, debug=False):
             generate_config_for_proxy(node, True)
 
             print get_command_output("ssh %(node)s 'nohup oslo-messaging-zmq-proxy %(debug)s "
-                                     "--redis-proxy --frontent-port %(port)s "
+                                     "--redis-proxy --frontend-port %(port)s "
                                      "--config-file=/etc/zmq-proxy/zmq.conf "
                                      "> /var/log/zmq-redis-proxy.log 2>&1 < /var/log/zmq-redis-proxy.log  &'" %
                                      {"node": node,
