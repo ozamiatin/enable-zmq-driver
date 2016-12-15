@@ -22,6 +22,7 @@ FRONTEND_PORT = 50001
 BACKEND_PORT = 50002
 PUBLISHER_PORT = 50003
 LOCAL_PUBLISHER_PORT = 60001
+LOCAL_REDIS_PROXY_PORT = 40001
 REDIS_PORT = 6379
 
 
@@ -138,7 +139,10 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
                               {"debug": "DEBUG" if debug else "WARN"})
 
             #newcontent.append('rpc_backend = zmq\n')
-            newcontent.append('transport_url = %s' % TRANSPORT_URL)
+            if TRANSPORT_URL.startswith("zmq+proxy"):
+                newcontent.append('transport_url = zmq+proxy://%s:%s' % (get_command_output("hostname"), LOCAL_REDIS_PROXY_PORT))
+            else:
+                newcontent.append('transport_url = %s' % TRANSPORT_URL)
 
         if RPC_BACKEND.match(line) or REDIS_SECTION.match(line) or ZMQ_SECTION.match(line):
             continue
