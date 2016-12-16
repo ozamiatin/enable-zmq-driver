@@ -169,7 +169,7 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
     newcontent.append('rpc_zmq_host = %s\n' % get_command_output("hostname"))
 
     if not use_router_proxy:
-        newcontent.append('zmq_linger = 20\n')
+        newcontent.append('zmq_linger = 60\n')
 
     if use_pub_sub:
         newcontent.append('subscribe_on = %s\n' % '%s:%s' % (get_command_output("hostname"), LOCAL_PUBLISHER_PORT))
@@ -177,8 +177,8 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
     newcontent.append('use_router_proxy = %s\n' % ("true" if use_router_proxy else "false"))
     newcontent.append('use_pub_sub = %s\n' % ("true" if use_pub_sub else "false"))
     newcontent.append('rpc_use_acks = %s\n' % ("true" if use_acks else "false"))
-    newcontent.append('zmq_target_update = %s\n' % "30")
-    newcontent.append('zmq_target_expire = %s\n' % "60")
+    newcontent.append('zmq_target_update = %s\n' % "60")
+    newcontent.append('zmq_target_expire = %s\n' % "90")
     newcontent.append('rpc_zmq_matchmaker = redis\n')
 
     with open(file_name, 'w') as fl:
