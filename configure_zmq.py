@@ -570,8 +570,8 @@ def main():
 
     CHANGE_REQUEST = args.change_request if args.change_request else CHANGE_REQUEST
 
-    PACKAGE_URL = PACKAGE_URL % CHANGE_REQUEST
-    PROXY_PACKAGE_URL = PROXY_PACKAGE_URL % CHANGE_REQUEST
+    PACKAGE_URL = PACKAGE_URL % {"change_request": CHANGE_REQUEST}
+    PROXY_PACKAGE_URL = PROXY_PACKAGE_URL % {"change_request": CHANGE_REQUEST}
 
     if args.package_url:
         PACKAGE_URL = args.package_url
