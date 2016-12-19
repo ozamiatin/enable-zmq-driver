@@ -155,13 +155,14 @@ EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 # PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos10_all.deb"
 
 
+CHANGE_REQUEST = 29351
 
-PACKAGE_URL = "http://172.18.162.63/review/CR-29351/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos17_all.deb"
-PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos17_all.deb"
+PACKAGE_URL = "http://172.18.162.63/review/CR-%(change_request)s/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos19_all.deb"
+PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos19_all.deb"
 
 
-PROXY_PACKAGE_URL = "http://172.18.162.63/review/CR-29351/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos17_all.deb"
-PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos17_all.deb"
+PROXY_PACKAGE_URL = "http://172.18.162.63/review/%(change_request)s/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos19_all.deb"
+PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos19_all.deb"
 
 
 OSLO_MESSAGING_GIT_REPO = "https://git.openstack.org/openstack/oslo.messaging"
@@ -528,6 +529,7 @@ parser.add_argument('--debug', dest='debug', action='store_true')
 parser.add_argument('--log-level', dest='log_level', type=str)
 parser.add_argument('--use-acks', dest='use_acks', action='store_true')
 parser.add_argument('--transport-url', dest='transport_url', type=str)
+parser.add_argument('--change-request', dest='change_request', type=str)
 
 
 args = parser.parse_args()
@@ -564,6 +566,12 @@ def main():
 
     global PACKAGE_NAME, PACKAGE_URL
     global PROXY_PACKAGE_NAME, PROXY_PACKAGE_URL
+    global CHANGE_REQUEST
+
+    CHANGE_REQUEST = args.change_request if args.change_request else CHANGE_REQUEST
+
+    PACKAGE_URL = PACKAGE_URL % CHANGE_REQUEST
+    PROXY_PACKAGE_URL = PROXY_PACKAGE_URL % CHANGE_REQUEST
 
     if args.package_url:
         PACKAGE_URL = args.package_url
