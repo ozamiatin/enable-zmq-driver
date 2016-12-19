@@ -157,11 +157,11 @@ EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 
 CHANGE_REQUEST = 29351
 
-PACKAGE_URL = "http://172.18.162.63/review/CR-%(change_request)s/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/python-oslo.messaging_4.6.1-3~u14.04%2bmos19_all.deb"
+PACKAGE_URL = "http://172.18.162.63/review/CR-%(change_request)s/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/%(package_name)s"
 PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos19_all.deb"
 
 
-PROXY_PACKAGE_URL = "http://172.18.162.63/review/%(change_request)s/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/oslo-messaging-zmq-receiver_4.6.1-3~u14.04%2bmos19_all.deb"
+PROXY_PACKAGE_URL = "http://172.18.162.63/review/%(change_request)s/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/%(package_name)s"
 PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos19_all.deb"
 
 
@@ -570,8 +570,10 @@ def main():
 
     CHANGE_REQUEST = args.change_request if args.change_request else CHANGE_REQUEST
 
-    PACKAGE_URL = PACKAGE_URL % {"change_request": CHANGE_REQUEST}
-    PROXY_PACKAGE_URL = PROXY_PACKAGE_URL % {"change_request": CHANGE_REQUEST}
+    PACKAGE_URL = PACKAGE_URL % {"change_request": CHANGE_REQUEST,
+                                 "package_name": PACKAGE_NAME}
+    PROXY_PACKAGE_URL = PROXY_PACKAGE_URL % {"change_request": CHANGE_REQUEST,
+                                             "package_name": PROXY_PACKAGE_NAME}
 
     if args.package_url:
         PACKAGE_URL = args.package_url
