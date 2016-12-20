@@ -158,11 +158,11 @@ EXPECTED_NUMBER_OF_FUEL_COLUMNS = 18
 CHANGE_REQUEST = 29351
 
 PACKAGE_URL = "http://172.18.162.63/review/CR-%(change_request)s/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/%(package_name)s"
-PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos19_all.deb"
+PACKAGE_NAME = "python-oslo.messaging_4.6.1-3~u14.04+mos20_all.deb"
 
 
 PROXY_PACKAGE_URL = "http://172.18.162.63/review/%(change_request)s/mos-repos/ubuntu/9.0/pool/main/p/python-oslo.messaging/%(package_name)s"
-PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos19_all.deb"
+PROXY_PACKAGE_NAME = "oslo-messaging-zmq-receiver_4.6.1-3~u14.04+mos20_all.deb"
 
 
 OSLO_MESSAGING_GIT_REPO = "https://git.openstack.org/openstack/oslo.messaging"
