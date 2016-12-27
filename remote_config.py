@@ -176,6 +176,7 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
 
     newcontent.append('use_router_proxy = %s\n' % ("true" if use_router_proxy else "false"))
     newcontent.append('use_pub_sub = %s\n' % ("true" if use_pub_sub else "false"))
+    newcontent.append('use_dynamic_connections = false\n')
     newcontent.append('rpc_use_acks = %s\n' % ("true" if use_acks else "false"))
     newcontent.append('zmq_target_update = %s\n' % "30")
     newcontent.append('zmq_target_expire = %s\n' % "90")
