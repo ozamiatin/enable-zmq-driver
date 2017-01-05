@@ -203,7 +203,7 @@ def exec_remote_configurer(node, command="", **kwargs):
     file_name = kwargs.get("file")
     transport_url = TRANSPORT_URL#kwargs.get("transport_url")
     print get_command_output("ssh %(node)s 'python /tmp/remote_config.py %(cmd)s "
-                             "--redis-host %(redis_host)s%(file)s%(use_pub_sub)s%(use_router_proxy)s%(debug)s%(use_acks)s%(double_proxy)s"
+                             "--redis-host %(redis_host)s%(file)s%(use_pub_sub)s%(use_router_proxy)s%(use_dynamic_connections)s%(debug)s%(use_acks)s%(double_proxy)s"
                              "%(transport_url)s'" %
                              {"node": node,
                               "cmd": command,
@@ -211,13 +211,14 @@ def exec_remote_configurer(node, command="", **kwargs):
                               "file": " --file %s" % file_name if file_name else "",
                               "use_pub_sub": " --use-pub-sub" if kwargs.pop("use_pub_sub", False) else "",
                               "use_router_proxy": " --use-router-proxy" if kwargs.pop("use_router_proxy", False) else "",
+                              "use_dynamic_connections": " --use-dynamic-connections" if kwargs.pop("use_dynamic_connections", False) else "",
                               "debug": " --debug" if kwargs.pop("debug", False) else "",
                               "use_acks": " --use-acks" if kwargs.pop("use_acks", False) else "",
                               "double_proxy": " --double-proxy" if kwargs.pop("double_proxy", False) else "",
                               "transport_url": (" --transport-url %s" % transport_url) if transport_url else ""})
 
 
-def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, use_router_proxy=True, debug=False, use_acks=False):
+def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, use_router_proxy=True, use_dynamic_connections=True, debug=False, use_acks=False):
     for node in nodes:
         print '\nHacking configs on %s' % node
 
@@ -225,7 +226,11 @@ def hack_configs_on_nodes(nodes, configs, use_pub_sub=True, use_router_proxy=Tru
             print 'Editing %s' % conf_file
             if not args.dry_run:
                 exec_remote_configurer(node, command="--hack", redis_host=REDIS_HOST, file=conf_file,
-                                       use_pub_sub=use_pub_sub, use_router_proxy=use_router_proxy, debug=debug, use_acks=use_acks # , transport_url=TRANSPORT_URL
+                                       use_pub_sub=use_pub_sub,
+                                       use_router_proxy=use_router_proxy,
+                                       use_dynamic_connections=use_dynamic_connections,
+                                       debug=debug,
+                                       use_acks=use_acks # , transport_url=TRANSPORT_URL
                                        )
 
 
@@ -514,6 +519,7 @@ parser.add_argument('--proxy-package-name', dest='proxy_package_name', type=str)
 parser.add_argument('--generate-config', dest='generate_config', action='store_true')
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
 parser.add_argument('--use-router-proxy', dest='use_router_proxy', action='store_true')
+parser.add_argument('--use-dynamic-connections', dest='use_dynamic_connections', action='store_true')
 parser.add_argument('--debug', dest='debug', action='store_true')
 parser.add_argument('--log-level', dest='log_level', type=str)
 parser.add_argument('--use-acks', dest='use_acks', action='store_true')
@@ -623,8 +629,8 @@ def main():
         restart_redis()
 
     if args.hack_configs:
-        hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS, use_pub_sub=use_pub_sub, use_router_proxy=args.use_router_proxy, debug=use_debug_logging, use_acks=args.use_acks)
-        hack_configs_on_nodes(computes, COMPUTE_CONFIGS, use_pub_sub=use_pub_sub, use_router_proxy=args.use_router_proxy, debug=use_debug_logging, use_acks=args.use_acks)
+        hack_configs_on_nodes(controllers, CONTROLLER_CONFIGS, use_pub_sub=use_pub_sub, use_dynamic_connections=args.use_dynamic_connections, use_router_proxy=args.use_router_proxy, debug=use_debug_logging, use_acks=args.use_acks)
+        hack_configs_on_nodes(computes, COMPUTE_CONFIGS, use_pub_sub=use_pub_sub, use_dynamic_connections=args.use_dynamic_connections, use_router_proxy=args.use_router_proxy, debug=use_debug_logging, use_acks=args.use_acks)
 
     if args.restore_configs:
         restore_configs(controllers, CONTROLLER_CONFIGS)

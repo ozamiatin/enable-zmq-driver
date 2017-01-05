@@ -121,7 +121,7 @@ def restore_backup():
     print get_command_output("mv %s %s" % (backup_file_name, file_name))
 
 
-def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
+def hack_services(debug, use_acks, use_router_proxy, use_pub_sub, use_dynamic_connections):
 
     file_name = args.file_name
     with open(file_name, 'r') as fl:
@@ -176,7 +176,7 @@ def hack_services(debug, use_acks, use_router_proxy, use_pub_sub):
 
     newcontent.append('use_router_proxy = %s\n' % ("true" if use_router_proxy else "false"))
     newcontent.append('use_pub_sub = %s\n' % ("true" if use_pub_sub else "false"))
-    newcontent.append('use_dynamic_connections = false\n')
+    newcontent.append('use_dynamic_connections = %s\n' % ("true" if use_dynamic_connections else "false"))
     newcontent.append('rpc_use_acks = %s\n' % ("true" if use_acks else "false"))
     newcontent.append('zmq_target_update = %s\n' % "30")
     newcontent.append('zmq_target_expire = %s\n' % "90")
@@ -199,6 +199,7 @@ parser.add_argument('--restore-backup', dest='restore_backup', action='store_tru
 parser.add_argument('--hack-redis', dest='hack_redis', action='store_true')
 parser.add_argument('--use-pub-sub', dest='use_pub_sub', action='store_true')
 parser.add_argument('--use-router-proxy', dest='use_router_proxy', action='store_true')
+parser.add_argument('--use-dynamic-connections', dest='use_dynamic_connections', action='store_true')
 parser.add_argument('--file', dest='file_name', type=str)
 parser.add_argument('--redis-host', dest='redis_host', type=str)
 parser.add_argument('--transport-url', dest='transport_url', type=str)
@@ -223,7 +224,8 @@ if __name__ == "__main__":
             hack_services(args.debug,
                           args.use_acks,
                           args.use_router_proxy,
-                          args.use_pub_sub)
+                          args.use_pub_sub,
+                          args.use_dynamic_connections)
         elif args.generate_redis_proxy:
             generate_redis_proxy_conf()
         elif args.restore_backup:
