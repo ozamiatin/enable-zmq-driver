@@ -611,7 +611,7 @@ def main():
 
     if args.start_local_proxies:
         start_local_publisher_on_nodes(controllers + computes, use_debug_logging)
-        start_redis_proxies_on_nodes(controllers + computes, use_debug_logging)
+        #start_redis_proxies_on_nodes(controllers + computes, use_debug_logging)
 
     if args.setup_venv:
         setup_venv(controllers)
